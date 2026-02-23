@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/auth/auth.service';
 import { Router } from '@angular/router';
+import { UserRole } from '../../core/models/user.model';
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -29,7 +30,9 @@ export class LoginComponent {
       .subscribe({
         next: () => {
           this.loading = false;
-          this.router.navigate(['/login']);
+          const role = this.auth.getUserRole()
+          const target = ROLE_TO_ROUTE[role!] ?? '/login';
+          this.router.navigateByUrl(target);
         },
         error: () => {
           this.loading = false;
@@ -38,3 +41,11 @@ export class LoginComponent {
       });
   }
 }
+
+
+export const ROLE_TO_ROUTE: Record<UserRole, string> = {
+  [UserRole.ADMIN]: '/app/admin/dashboard',
+  [UserRole.MIXER]: '/app/mixer/home',
+  [UserRole.VIDEO]: '/app/video/home',
+  [UserRole.USER]:  '/app/user/home',
+};
