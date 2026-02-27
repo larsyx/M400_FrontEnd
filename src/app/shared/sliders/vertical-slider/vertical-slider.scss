@@ -1,0 +1,226 @@
+@use '../../../../styles/variables' as vars;
+
+.vertical-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; 
+  align-items: center;
+  width: 130px;
+  padding: vars.$spacing-md;
+  background: vars.$bg-primary;
+  border-radius: vars.$border-radius-xl;
+  box-shadow: vars.$box-shadow;
+  user-select: none;
+  border: 1px solid vars.$border-color;
+  height: 100%;
+  
+  &.muted {
+    opacity: 0.5;
+  }
+}
+
+.slider-label {
+  font-size: 9px;
+  font-weight: vars.$font-weight-semibold;
+  color: vars.$text-primary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  
+  &.clickable {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: vars.$border-radius;
+    transition: vars.$transition-base;
+    
+    &:hover {
+      background: vars.$bg-secondary;
+      color: var(--bs-primary);
+      transform: scale(1.05);
+    }
+    
+    &:active {
+      transform: scale(0.95);
+    }
+    
+    // Label rosso quando il canale è muted
+    &.muted-label {
+      background: vars.$danger-color;
+      color: vars.$text-light;
+      
+      &:hover {
+        background: darken(vars.$danger-color, 10%);
+        color: vars.$text-light;
+      }
+    }
+  }
+}
+
+.slider-sublabel {
+  font-size: 16px;
+  font-weight: vars.$font-weight-medium;
+  color: vars.$text-secondary;
+  margin-bottom: vars.$spacing-sm;
+  text-align: center;
+  font-style: italic;
+}
+
+.value-display {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 4px 4px;
+  background: vars.$bg-secondary;
+  border-radius: vars.$border-radius;
+  margin-bottom: vars.$spacing-sm;
+  border: 1px solid vars.$border-color;
+  
+  .value {
+    font-size: vars.$font-size-sm;
+    font-weight: 600;
+    color: var(--bs-primary);
+    min-width: 32px;
+    text-align: right;
+  }
+  
+  .unit {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--bs-primary);
+  }
+}
+
+.increment-btn,
+.decrement-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid vars.$border-color;
+  background: vars.$bg-primary;
+  border-radius: vars.$border-radius;
+  color: vars.$text-primary;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: vars.$transition-base;
+  padding: 0;
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  &:hover {
+    background: var(--bs-primary);
+    color: vars.$text-light;
+    border-color: var(--bs-primary);
+    transform: scale(1.1);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.increment-btn {
+  margin-bottom: vars.$spacing-sm;
+}
+
+.decrement-btn {
+  margin-top: vars.$spacing-sm;
+  margin-bottom: vars.$spacing-sm;
+}
+
+.slider-container {
+  width: 100%;
+  flex: 1; // Cresce dinamicamente per riempire lo spazio disponibile
+  min-height: 100px; // Altezza minima per evitare che diventi troppo piccolo
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.slider-track {
+  width: 8px;
+  height: 100%;
+  background: vars.$bg-secondary;
+  border-radius: vars.$border-radius-sm;
+  position: relative;
+  cursor: default;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  border: 1px solid vars.$border-color;
+}
+
+.track-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, var(--bs-primary) 0%, var(--bs-primary) 100%);
+  border-radius: vars.$border-radius-sm;
+  transition: height 0.1s ease-out;
+  pointer-events: none;
+}
+
+.slider-thumb {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 28px;
+  margin-bottom: -14px;
+  background: vars.$bg-primary;
+  border: 2px solid var(--bs-primary);
+  border-radius: vars.$border-radius-sm;
+  cursor: grab;
+  transition: transform 0.1s ease;
+  box-shadow: vars.$box-shadow-sm;
+  
+  &:hover {
+    transform: translateX(-50%) scale(1.15);
+  }
+  
+  &:active {
+    cursor: grabbing;
+    transform: translateX(-50%) scale(1.1);
+  }
+}
+
+.mute-button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid vars.$border-color;
+  background: vars.$bg-primary;
+  border-radius: vars.$border-radius-lg;
+  color: vars.$text-primary;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: vars.$transition-base;
+  padding: 0;
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  &:hover {
+    background: vars.$bg-secondary;
+    transform: scale(1.05);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  &.active {
+    background: vars.$danger-color;
+    color: vars.$text-light;
+    border-color: vars.$danger-color;
+    
+    &:hover {
+      background: darken(vars.$danger-color, 10%);
+    }
+  }
+}

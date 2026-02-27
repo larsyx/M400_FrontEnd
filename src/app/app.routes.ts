@@ -6,8 +6,11 @@ import { UserRole } from './core/models/user.model';
 import { roleGuard } from './core/auth/role.guard';
 import path from 'path';
 
-const loadHomePage = () => import('./features/home/pages/home-page/home-page')
-                .then(m => m.HomePageComponent)
+const loadHomePage = () => import('./features/mixer/home-page/home-page')
+                .then(m => m.HomePageComponent);
+
+const loadDcaPage = () => import('./features/mixer/pages/dca/dca')
+                .then(m => m.Dca);
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -24,6 +27,10 @@ export const routes: Routes = [
                     {
                         'path' : 'dashboard',
                         loadComponent: loadHomePage
+                    },
+                    {
+                        'path' : 'users',
+                        loadComponent: loadHomePage
                     }
                 ]
             },
@@ -35,6 +42,14 @@ export const routes: Routes = [
                     {
                         'path' : 'home',
                         loadComponent: loadHomePage
+                    },
+                    {
+                        'path' : 'dca',
+                        loadComponent : loadDcaPage
+                    },
+                    {
+                        'path' : 'scene',
+                        loadComponent : loadHomePage
                     }
                 ]
             },
@@ -51,12 +66,15 @@ export const routes: Routes = [
             },
             {
                 path: 'user',
-                loadComponent: loadHomePage,
                 canActivate: [roleGuard],
                 data : { roles: [UserRole.ADMIN, UserRole.USER] },
                 children: [
                     {
                         'path' : 'home',
+                        loadComponent: loadHomePage
+                    },
+                    {
+                        'path' : 'profile',
                         loadComponent: loadHomePage
                     }
                 ]

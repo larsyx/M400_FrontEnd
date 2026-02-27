@@ -31,7 +31,6 @@ export class Header implements OnInit{
       return;
     }
 
-    console.log(MENU_ITEMS.filter(item => { item.roles.includes(this.currentUser!.role)}));
     this.menuItems = MENU_ITEMS.filter(item => item.roles.includes(this.currentUser!.role));
   }
    

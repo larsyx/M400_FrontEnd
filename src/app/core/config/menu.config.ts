@@ -9,9 +9,15 @@ export interface MenuItem{
 
 export const MENU_ITEMS: MenuItem[] = [
     {
-        label: 'Home',
+        label: 'Fader',
         route: '/app/mixer/home',
         icon: 'home',
+        roles: [UserRole.MIXER]
+    },
+    {
+        label: 'DCA',
+        route: '/app/mixer/dca',
+        icon: 'dca',
         roles: [UserRole.MIXER]
     },
     {
@@ -40,7 +46,7 @@ export const MENU_ITEMS: MenuItem[] = [
     },
     {
         label: 'Scene',
-        route: '/app/mixer/sceme',
+        route: '/app/mixer/scene',
         icon: 'people',
         roles: [UserRole.ADMIN, UserRole.MIXER]
     },

@@ -1,0 +1,17 @@
+
+<div class="aux-container">
+    <button class="btn btn-outline-primary"
+    [class.active]="selectedIndex === -1"
+    (click)="select(-1)">
+        Main
+    </button>
+
+    @for (item of auxs; track $index) {
+        <button class="btn btn-outline-primary"  
+            [class.active]="selectedIndex === $index"
+            (click)="select($index)">
+            {{ item.name }}
+        </button>
+    }
+</div>
+

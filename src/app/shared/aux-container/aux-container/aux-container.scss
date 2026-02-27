@@ -1,0 +1,9 @@
+@use '../../../../styles/variables' as vars;
+
+.aux-container{
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    width: 100%;
+    background-color: vars.$bg-primary;
+}

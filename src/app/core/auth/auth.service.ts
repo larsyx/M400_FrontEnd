@@ -1,7 +1,7 @@
 // core/auth/auth.service.ts
-import { Injectable } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { CookieService } from 'ngx-cookie-service';
 import { BehaviorSubject, tap } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { JwtPayload, User, UserRole } from '../models/user.model';
@@ -12,15 +12,15 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
-  private cookieName = 'access_token';
+  private tokenName = 'access_token';
   private API_URL = environment.apiUrl;
+  private platformId = inject(PLATFORM_ID);
   
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(
     private http: HttpClient,
-    private cookieService: CookieService,
     private routes: Router
   ) {
     this.initializeUser();
@@ -40,11 +40,9 @@ export class AuthService {
 
     return this.http.post<any>(`${this.API_URL}/login`, formData).pipe(
       tap((res) => {
-        this.cookieService.set(this.cookieName, res, {
-          path: '/',
-          secure: true,
-          sameSite: 'Strict'
-        });
+        if (isPlatformBrowser(this.platformId)) {
+          localStorage.setItem(this.tokenName, res);
+        }
 
         const user = this.decodeToken(res);
         if(user){
@@ -58,11 +56,16 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return this.cookieService.get(this.cookieName) || null;
+    if (isPlatformBrowser(this.platformId)) {
+      return localStorage.getItem(this.tokenName) || null;
+    }
+    return null; // Lato server, nessun token disponibile
   }
 
   logout() {
-    this.cookieService.delete(this.cookieName, '/');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem(this.tokenName);
+    }
     this.currentUserSubject.next(null);
     this.routes.navigate(['/login'])
   }

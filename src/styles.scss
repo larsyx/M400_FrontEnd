@@ -1,4 +1,24 @@
 /* You can add global styles to this file, and also import other style files */
 
 /* Importing Bootstrap SCSS file. */
-@use 'bootstrap/scss/bootstrap';
+@use "bootstrap/scss/bootstrap";
+
+/* Importing Bootstrap Icons */
+@use "bootstrap-icons/font/bootstrap-icons.css";
+
+// Import variables
+@use 'styles/variables';
+
+/* Custom global styles */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Navbar custom styles */
+.navbar {
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.navbar-brand img {
+  filter: brightness(0) invert(1);
+}

@@ -1,0 +1,16 @@
+<div class="mixer-channels">
+      @for(channel of channels; track i; let i = $index){
+      <app-vertical-slider
+        [label]="channel.label"
+        [sublabel]="channel.sublabel"
+        [value]="channel.value"
+        [muted]="channel.muted"
+        [min]="-90"
+        [max]="10"
+        [step]="0.1"
+        [showMuteButton]="true"
+        (valueChange)="onValueChange(i, $event)"
+        (muteChange)="onMuteChange(i, $event)">
+      </app-vertical-slider>
+    }
+    </div>
