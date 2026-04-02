@@ -1,0 +1,174 @@
+<div class="equalizer">
+  <h3 class="equalizer-title">EQUALIZZATORE</h3>
+  
+  <!-- Grafico interattivo -->
+  <div class="eq-graph-container">
+    <svg
+      #eqGraph
+      [attr.width]="graphWidth"
+      [attr.height]="graphHeight"
+      class="eq-graph"
+      (mousemove)="onGraphMouseMove($event)"
+      (mouseup)="onGraphMouseUp()"
+      (mouseleave)="onGraphMouseUp()"
+      (touchmove)="onGraphTouchMove($event)"
+      (touchend)="onGraphTouchEnd()"
+      (touchcancel)="onGraphTouchEnd()">
+      
+      <!-- Background -->
+      <rect 
+        [attr.x]="graphPadding.left" 
+        [attr.y]="graphPadding.top"
+        [attr.width]="graphWidth - graphPadding.left - graphPadding.right"
+        [attr.height]="graphHeight - graphPadding.top - graphPadding.bottom"
+        class="graph-bg"
+      />
+      
+      <!-- Grid lines - Gain (horizontal) -->
+      @for (gain of getGainGridLines(); track gain) {
+        <line
+          [attr.x1]="graphPadding.left"
+          [attr.y1]="gainToY(gain)"
+          [attr.x2]="graphWidth - graphPadding.right"
+          [attr.y2]="gainToY(gain)"
+          [class.zero-line]="gain === 0"
+          class="grid-line"
+        />
+        <text
+          [attr.x]="graphPadding.left - 10"
+          [attr.y]="gainToY(gain) + 4"
+          class="grid-label"
+          text-anchor="end">
+          {{ gain > 0 ? '+' : '' }}{{ gain }}
+        </text>
+      }
+      
+      <!-- Grid lines - Frequency (vertical) -->
+      @for (freq of getFreqGridLines(); track freq) {
+        <line
+          [attr.x1]="freqToX(freq)"
+          [attr.y1]="graphPadding.top"
+          [attr.x2]="freqToX(freq)"
+          [attr.y2]="graphHeight - graphPadding.bottom"
+          class="grid-line"
+        />
+        <text
+          [attr.x]="freqToX(freq)"
+          [attr.y]="graphHeight - graphPadding.bottom + 20"
+          class="grid-label"
+          text-anchor="middle">
+          {{ getFrequencyLabel(freq) }}
+        </text>
+      }
+      
+      <!-- EQ Response Curve -->
+      <path
+        [attr.d]="getCurvePath()"
+        class="eq-curve"
+      />
+      
+      <!-- Band points (draggable) -->
+      @for (band of bands; track $index) {
+        <g class="band-point-group">
+          <!-- Vertical line showing frequency -->
+          <line
+            [attr.x1]="freqToX(band.frequency)"
+            [attr.y1]="graphPadding.top"
+            [attr.x2]="freqToX(band.frequency)"
+            [attr.y2]="graphHeight - graphPadding.bottom"
+            class="band-freq-line"
+            [style.stroke]="getBandColor($index)"
+          />
+          
+          <!-- Draggable point -->
+          <circle
+            [attr.cx]="freqToX(band.frequency)"
+            [attr.cy]="gainToY(band.gain)"
+            r="8"
+            [style.fill]="getBandColor($index)"
+            class="band-point"
+            (mousedown)="onPointMouseDown($event, $index)"
+            (touchstart)="onPointTouchStart($event, $index)"
+          />
+          
+          <!-- Label for band -->
+          <text
+            [attr.x]="freqToX(band.frequency)"
+            [attr.y]="gainToY(band.gain) - 15"
+            class="band-label-text"
+            text-anchor="middle"
+            [style.fill]="getBandColor($index)">
+            {{ band.label }}
+          </text>
+        </g>
+      }
+    </svg>
+  </div>
+  
+  <!-- Controlli compatti con input draggabili -->
+  <div class="eq-bands-compact">
+    @for (band of bands; track $index) {
+      <div class="eq-band-compact" [style.border-left-color]="getBandColor($index)">
+        <!-- Label della banda -->
+        <div class="band-label-compact" [style.color]="getBandColor($index)">
+          {{ band.label }}
+        </div>
+        
+        <div class="controls-row">
+          <!-- Controllo Frequenza con Knob -->
+          <div class="control-compact">
+            <label class="control-label-compact">FREQ</label>
+            <app-knob
+              [(value)]="band.frequency"
+              [min]="band.freqMin"
+              [max]="band.freqMax"
+              [step]="10"
+              [size]="60"
+              [strokeWidth]="8"
+              [valueColor]="getBandColor($index)"
+              [valueTemplate]="getFrequencyLabel(band.frequency)"
+              [ariaLabel]="band.label + ' frequency'"
+              (onChange)="onFrequencyChange($index, $event)"
+            ></app-knob>
+          </div>
+          
+          <!-- Controllo Gain con Knob -->
+          <div class="control-compact">
+            <label class="control-label-compact">GAIN</label>
+            <app-knob
+              [(value)]="band.gain"
+              [min]="minGain"
+              [max]="maxGain"
+              [step]="0.5"
+              [size]="60"
+              [strokeWidth]="8"
+              [valueColor]="getBandColor($index)"
+              [valueTemplate]="getGainLabel(band.gain) + 'dB'"
+              [ariaLabel]="band.label + ' gain'"
+              (onChange)="onGainChange($index, $event)"
+            ></app-knob>
+          </div>
+          
+          <!-- Controllo Q con Knob (solo per bande parametriche) -->
+          @if (band.type === 'parametric') {
+            <div class="control-compact">
+              <label class="control-label-compact">Q</label>
+              <app-knob
+                [(value)]="band.q!"
+                [min]="0.3"
+                [max]="10"
+                [step]="0.1"
+                [size]="60"
+                [strokeWidth]="8"
+                [valueColor]="getBandColor($index)"
+                [valueTemplate]="(band.q || 1.0).toFixed(1)"
+                [ariaLabel]="band.label + ' Q factor'"
+                (onChange)="onQChange($index, $event)"
+              ></app-knob>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

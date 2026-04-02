@@ -1,0 +1,35 @@
+<div 
+  class="knob-container" 
+  [class.knob-disabled]="disabled"
+  [class.knob-readonly]="readonly"
+  [class.knob-dragging]="isDragging"
+  [style.width.px]="size"
+  [style.height.px]="size"
+  role="slider"
+  [attr.aria-valuemin]="min"
+  [attr.aria-valuemax]="max"
+  [attr.aria-valuenow]="value"
+  [attr.aria-valuetext]="displayValue"
+  [attr.aria-disabled]="disabled"
+  [attr.aria-readonly]="readonly"
+  [attr.aria-label]="ariaLabel || 'Knob control'"
+  [attr.tabindex]="disabled ? -1 : 0"
+  (mousedown)="onMouseDown($event)"
+  (touchstart)="onTouchStart($event)"
+  (wheel)="onWheel($event)"
+>
+  <canvas 
+    #knobCanvas 
+    [width]="size" 
+    [height]="size"
+    class="knob-canvas"
+  ></canvas>
+
+  @if (showValue) {
+    <div class="knob-value" [style.color]="textColor">
+      <span class="knob-value-text">{{ displayValue }}</span>
+    </div>
+  }
+  
+  <div class="knob-focus-ring"></div>
+</div>

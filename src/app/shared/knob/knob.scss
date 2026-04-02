@@ -1,0 +1,256 @@
+.knob-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  touch-action: none;
+  outline: none;
+  border-radius: 50%;
+  transition: transform 0.1s ease-out;
+
+  // Focus state
+  &:focus {
+    .knob-focus-ring {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  // Active/dragging state
+  &:active,
+  &.knob-dragging {
+    cursor: grabbing;
+    transform: scale(1.05);
+    
+    .knob-canvas {
+      filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.25));
+    }
+  }
+
+  // Disabled state
+  &.knob-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(0.8);
+    
+    &:active {
+      transform: none;
+    }
+    
+    .knob-canvas {
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
+    }
+  }
+
+  // Readonly state
+  &.knob-readonly {
+    cursor: default;
+    
+    &:active {
+      transform: none;
+    }
+  }
+
+  // Hover effect (only when not disabled/readonly)
+  &:not(.knob-disabled):not(.knob-readonly):hover {
+    .knob-canvas {
+      filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.2));
+    }
+  }
+}
+
+.knob-canvas {
+  display: block;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+  transition: filter 0.2s ease;
+}
+
+.knob-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+  z-index: 1;
+}
+
+.knob-value-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.knob-focus-ring {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 3px solid #4CAF50;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+// Responsive font sizes based on knob size
+.knob-container {
+  // Small knobs (50-60px)
+  &[style*="width: 50px"],
+  &[style*="width: 60px"] {
+    .knob-value-text {
+      font-size: 0.6rem;
+      font-weight: 700;
+    }
+  }
+
+  // Medium-small knobs (70-80px)
+  &[style*="width: 70px"],
+  &[style*="width: 80px"] {
+    .knob-value-text {
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  }
+
+  // Medium knobs (90-100px)
+  &[style*="width: 90px"],
+  &[style*="width: 100px"] {
+    .knob-value-text {
+      font-size: 0.85rem;
+    }
+  }
+
+  // Medium-large knobs (110-120px)
+  &[style*="width: 110px"],
+  &[style*="width: 120px"] {
+    .knob-value-text {
+      font-size: 0.95rem;
+    }
+  }
+
+  // Large knobs (130-150px)
+  &[style*="width: 130px"],
+  &[style*="width: 140px"],
+  &[style*="width: 150px"] {
+    .knob-value-text {
+      font-size: 1.1rem;
+    }
+  }
+
+  // Extra large knobs (160-200px)
+  &[style*="width: 160px"],
+  &[style*="width: 170px"],
+  &[style*="width: 180px"],
+  &[style*="width: 190px"],
+  &[style*="width: 200px"] {
+    .knob-value-text {
+      font-size: 1.3rem;
+    }
+  }
+
+  // Huge knobs (250-300px)
+  &[style*="width: 250px"],
+  &[style*="width: 300px"] {
+    .knob-value-text {
+      font-size: 1.8rem;
+    }
+  }
+}
+
+// Animation for smooth value changes
+@keyframes knob-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+// Apply pulse animation on value change (optional)
+.knob-container.knob-value-changed {
+  animation: knob-pulse 0.3s ease;
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .knob-value-text {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+  
+  .knob-focus-ring {
+    border-color: #66BB6A;
+    box-shadow: 0 0 0 2px rgba(102, 187, 106, 0.3);
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .knob-container {
+    &:focus {
+      .knob-focus-ring {
+        border-width: 4px;
+      }
+    }
+  }
+  
+  .knob-value-text {
+    font-weight: 700;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .knob-container {
+    transition: none;
+    
+    &:active,
+    &.knob-dragging {
+      transform: none;
+    }
+  }
+  
+  .knob-canvas {
+    transition: none;
+  }
+  
+  .knob-focus-ring {
+    transition: opacity 0.1s;
+  }
+  
+  .knob-container.knob-value-changed {
+    animation: none;
+  }
+}
+
+// Print styles
+@media print {
+  .knob-container {
+    filter: none !important;
+    
+    .knob-canvas {
+      filter: none !important;
+    }
+    
+    .knob-focus-ring {
+      display: none;
+    }
+  }
+}
+

@@ -1,9 +1,18 @@
-.dca-container {
-  padding: 1rem;
-  position: relative;
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 80%;
   width: 100%;
+}
+
+.dca-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
   padding: 1rem;
-  padding-right: calc(150px + 1rem);
   box-sizing: border-box;
-  height: 800px;
+  overflow: hidden;
 }

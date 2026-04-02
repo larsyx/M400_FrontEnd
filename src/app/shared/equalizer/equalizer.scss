@@ -1,0 +1,213 @@
+@use '../../../styles/variables' as vars;
+
+.equalizer {
+  padding: vars.$spacing-lg;
+  background: vars.$bg-primary;
+  border-radius: vars.$border-radius-xl;
+  box-shadow: vars.$box-shadow;
+  border: 1px solid vars.$border-color;
+}
+
+.equalizer-title {
+  font-size: 14px;
+  font-weight: vars.$font-weight-bold;
+  color: vars.$text-primary;
+  text-align: center;
+  margin-bottom: vars.$spacing-lg;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+// Grafico SVG
+.eq-graph-container {
+  margin-bottom: vars.$spacing-md;
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+}
+
+.eq-graph {
+  border: 1px solid vars.$border-color;
+  border-radius: vars.$border-radius-lg;
+  background: vars.$bg-secondary;
+  cursor: crosshair;
+  touch-action: none; // Previene scroll durante il drag su touch
+}
+
+.graph-bg {
+  fill: vars.$bg-primary;
+}
+
+.grid-line {
+  stroke: vars.$border-color;
+  stroke-width: 1;
+  stroke-dasharray: 2, 2;
+  
+  &.zero-line {
+    stroke: vars.$text-secondary;
+    stroke-width: 2;
+    stroke-dasharray: none;
+  }
+}
+
+.grid-label {
+  font-size: 10px;
+  fill: vars.$text-secondary;
+  font-weight: vars.$font-weight-medium;
+}
+
+.eq-curve {
+  fill: none;
+  stroke: var(--bs-primary);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.band-freq-line {
+  stroke-width: 1;
+  stroke-dasharray: 4, 4;
+  opacity: 0.6;
+}
+
+.band-point-group {
+  cursor: move;
+  
+  &:hover .band-point {
+    r: 10;
+    filter: drop-shadow(0 0 4px currentColor);
+  }
+}
+
+.band-point {
+  stroke: #fff;
+  stroke-width: 2;
+  cursor: grab;
+  transition: r 0.2s ease;
+  touch-action: none; // Previene comportamenti touch di default
+  
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.band-label-text {
+  font-size: 10px;
+  font-weight: vars.$font-weight-bold;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+// Layout compatto per i controlli
+.eq-bands-compact {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: vars.$spacing-md;
+}
+
+.eq-band-compact {
+  display: flex;
+  flex-direction: column;
+  gap: vars.$spacing-sm;
+  padding: vars.$spacing-sm;
+  background: vars.$bg-secondary;
+  border-radius: vars.$border-radius;
+  border: 1px solid vars.$border-color;
+  border-left-width: 3px;
+}
+
+.band-label-compact {
+  font-size: 10px;
+  font-weight: vars.$font-weight-bold;
+  text-align: center;
+  padding: 4px;
+  background: vars.$bg-primary;
+  border-radius: vars.$border-radius-sm;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.controls-row {
+  display: flex;
+  flex-direction: row;
+  gap: vars.$spacing-sm;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.control-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+}
+
+.control-label-compact {
+  font-size: 8px;
+  font-weight: vars.$font-weight-semibold;
+  color: vars.$text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+// Input draggabile - stile come un display di plugin audio professionale
+.draggable-input {
+  width: 100%;
+  padding: 6px 4px;
+  font-size: 11px;
+  font-weight: vars.$font-weight-bold;
+  color: vars.$text-primary;
+  text-align: center;
+  background: vars.$bg-primary;
+  border: 1px solid vars.$border-color;
+  border-radius: vars.$border-radius-sm;
+  cursor: ns-resize; // Cursore di ridimensionamento verticale
+  user-select: none;
+  transition: all 0.15s ease;
+  font-family: 'Courier New', monospace;
+  
+  &:hover {
+    background: lighten(vars.$bg-primary, 5%);
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), 0.1);
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.2);
+  }
+  
+  &.dragging {
+    background: var(--bs-primary);
+    color: vars.$text-light;
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 8px rgba(var(--bs-primary-rgb), 0.4);
+    transform: scale(1.05);
+  }
+}
+
+// Responsive per schermi più piccoli
+@media (max-width: 1024px) {
+  .eq-bands-compact {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .eq-bands-compact {
+    grid-template-columns: 1fr;
+  }
+  
+  .controls-row {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .control-compact {
+    min-width: 80px;
+  }
+}
