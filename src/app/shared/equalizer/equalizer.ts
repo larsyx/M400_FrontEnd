@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ElementRef, ViewChild, AfterViewInit, HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ElementRef, ViewChild, AfterViewInit, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { KnobComponent } from '../knob/knob';
@@ -56,6 +56,8 @@ export class Equalizer implements AfterViewInit {
   ];
 
   @Output() bandsChange = new EventEmitter<EQBand[]>();
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   ngAfterViewInit(): void {
     this.updateGraph();
@@ -126,6 +128,7 @@ export class Equalizer implements AfterViewInit {
     
     this.updateGraph();
     this.bandsChange.emit(this.bands);
+    this.cdr.markForCheck();
   }
 
   @HostListener('document:mouseup', ['$event'])
@@ -300,6 +303,7 @@ export class Equalizer implements AfterViewInit {
     
     this.updateGraph();
     this.bandsChange.emit(this.bands);
+    this.cdr.markForCheck();
   }
 
   onGraphMouseUp(): void {
@@ -311,6 +315,7 @@ export class Equalizer implements AfterViewInit {
   }
 
   updateGraph(): void {
-    this.bands = [...this.bands];
+    // Create new array and new objects to trigger change detection
+    this.bands = this.bands.map(band => ({ ...band }));
   }
 }

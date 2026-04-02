@@ -7,6 +7,8 @@ import {
   ViewChild,
   AfterViewInit,
   OnDestroy,
+  OnChanges,
+  SimpleChanges,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   HostListener
@@ -22,7 +24,7 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./knob.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class KnobComponent implements AfterViewInit, OnDestroy {
+export class KnobComponent implements AfterViewInit, OnDestroy, OnChanges {
   // Configuration inputs
   @Input() value: number = 0;
   @Input() min: number = 0;
@@ -75,6 +77,12 @@ export class KnobComponent implements AfterViewInit, OnDestroy {
   private animationFrameId?: number;
 
   constructor(private cdr: ChangeDetectorRef) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['value'] && !changes['value'].firstChange) {
+      this.render();
+    }
+  }
 
   ngAfterViewInit(): void {
     this.initCanvas();
