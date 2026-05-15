@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ElementRef, ViewChild, AfterViewInit, HostListener, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ElementRef, ViewChild, AfterViewInit, OnInit, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { KnobComponent } from '../knob/knob';
@@ -30,12 +30,57 @@ interface DragState {
   templateUrl: './equalizer.html',
   styleUrl: './equalizer.scss',
 })
-export class Equalizer implements AfterViewInit {
+export class Equalizer implements AfterViewInit, OnInit {
+  editMode: boolean = false;
+  showEQModal: boolean = false; // Modale per smartphone
   @ViewChild('eqGraph', { static: false }) eqGraphRef!: ElementRef<SVGSVGElement>;
   
+  ngOnInit() {
+    if (this.isMobile()) {
+      // Usa setTimeout per assicurarsi che il componente sia completamente inizializzato
+      setTimeout(() => {
+        this.showEQModal = true;
+        this.editMode = true;
+      }, 100);
+    }
+  }
+  
+  isMobile(): boolean {
+    if (typeof window === 'undefined') return false;
+    const width = window.innerWidth;
+    
+    return width < 768;
+  }
+  
+  // Metodo pubblico per aprire la modale (chiamato dalla home page)
+  openModal() {
+    this.showEQModal = true;
+    this.editMode = true;
+  }
+  
+  toggleEditMode() {
+    // Su mobile apri la modale invece di toggle inline
+    if (this.isMobile()) {
+      this.openModal();
+    } else {
+      this.editMode = !this.editMode;
+    }
+  }
+  
+  closeEQModal() {
+    this.showEQModal = false;
+    this.editMode = false;
+  }
+  
+  // Dimensioni base per viewBox (coordinate interne SVG)
   graphWidth = 800;
   graphHeight = 300;
   graphPadding = { top: 20, right: 40, bottom: 40, left: 60 };
+  
+  // ViewBox per SVG responsive
+  get viewBox(): string {
+    return `0 0 ${this.graphWidth} ${this.graphHeight}`;
+  }
   
   minFreq = 20;
   maxFreq = 20000;
@@ -267,11 +312,9 @@ export class Equalizer implements AfterViewInit {
     if (this.draggedBandIndex === null) return;
     
     const svg = this.eqGraphRef.nativeElement;
-    const rect = svg.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const point = this.getSVGPoint(svg, event.clientX, event.clientY);
     
-    this.updateBandPosition(x, y);
+    this.updateBandPosition(point.x, point.y);
   }
 
   onGraphTouchMove(event: TouchEvent): void {
@@ -280,12 +323,19 @@ export class Equalizer implements AfterViewInit {
     event.preventDefault();
     
     const svg = this.eqGraphRef.nativeElement;
-    const rect = svg.getBoundingClientRect();
     const touch = event.touches[0];
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
+    const point = this.getSVGPoint(svg, touch.clientX, touch.clientY);
     
-    this.updateBandPosition(x, y);
+    this.updateBandPosition(point.x, point.y);
+  }
+
+  private getSVGPoint(svg: SVGSVGElement, clientX: number, clientY: number): { x: number, y: number } {
+    const pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    
+    const svgP = pt.matrixTransform(svg.getScreenCTM()!.inverse());
+    return { x: svgP.x, y: svgP.y };
   }
 
   private updateBandPosition(x: number, y: number): void {

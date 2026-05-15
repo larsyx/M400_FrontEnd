@@ -10,8 +10,15 @@
 @use 'styles/variables';
 
 /* Custom global styles */
-body {
+html, body {
   font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: fixed;
+  overscroll-behavior: none;
 }
 
 /* Navbar custom styles */

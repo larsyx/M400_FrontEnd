@@ -9,21 +9,24 @@
     </button>
   </div>
 
-  @if (activeView === HomeViewButtons.EQ) {
-    <div class="equalizer-section">
+  <div class="content-section"
+       [class.has-content]="activeView !== null"
+       [class.eq-active]="activeView === HomeViewButtons.EQ"
+       [class.dca-active]="activeView === HomeViewButtons.DCA">
+    <div class="eq-container" [class.hidden]="activeView !== HomeViewButtons.EQ">
       <app-equalizer></app-equalizer>
     </div>
-  }
+    
+    @if (activeView === HomeViewButtons.DCA) {
+      <div class="dca-container">
+        <app-dca></app-dca>
+      </div>
+    }
 
-  @if (activeView === HomeViewButtons.DCA) {
-    <div class="equalizer-section">
-      <app-dca></app-dca>
+    <div class="main-fader">
+      <app-sliders-container></app-sliders-container>
+      <app-aux-container></app-aux-container>
     </div>
-  }
-
-  <div class="main-fader" [class.with-eq]="isEqActive">
-    <app-sliders-container></app-sliders-container>
-    <app-aux-container></app-aux-container>
   </div>
 
 </div>

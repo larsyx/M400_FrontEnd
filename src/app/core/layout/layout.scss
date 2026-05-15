@@ -1,9 +1,16 @@
 :host {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
   overflow: hidden;
+}
+
+// Fallback for browsers that don't support dvh
+@supports not (height: 100dvh) {
+  :host {
+    height: 100vh;
+  }
 }
 
 .main-content {
@@ -11,4 +18,30 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+}
+
+// Add padding for mobile bottom navigation (tablet and mobile)
+@media (max-width: 1199px) {
+  :host {
+    padding-bottom: 55px;
+  }
+  
+  .main-content {
+    padding-bottom: 0;
+  }
+}
+
+// Reduced padding for smartphones
+@media (max-width: 767px) {
+  :host {
+    padding-bottom: 45px;
+  }
+}
+
+// Extra reduced padding for small smartphones
+@media (max-width: 480px) {
+  :host {
+    padding-bottom: 40px;
+  }
 }

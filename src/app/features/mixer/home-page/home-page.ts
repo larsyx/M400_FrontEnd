@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
 import { SlidersContainer } from '../../../shared/sliders/sliders-container/sliders-container/sliders-container';
 import { AuxContainer } from '../../../shared/aux-container/aux-container/aux-container';
@@ -20,8 +20,31 @@ export class HomePageComponent {
   isEqActive : boolean = false;
   isDcaActive : boolean = false;
 
+  @ViewChild(Equalizer) equalizerComponent?: Equalizer;
+
+  // Rileva se siamo su smartphone
+  isMobile(): boolean {
+    if (typeof window === 'undefined') return false;
+    const width = window.innerWidth;
+    return width < 768;
+  }
+
   setView(view : HomeViewButtons){
+    // Imposta sempre activeView per attivare il bottone
     this.activeView = view === this.activeView ? null : view;
+    
+    // Su mobile se clicco EQ apri anche la modale
+    if (view === HomeViewButtons.EQ && this.activeView === HomeViewButtons.EQ && this.isMobile()) {
+      
+      setTimeout(() => {
+        if (this.equalizerComponent) {
+          console.log('Calling openModal()');
+          this.equalizerComponent.openModal();
+        } else {
+          console.error('Equalizer component not found!');
+        }
+      }, 0);
+    }
   }
 }
 

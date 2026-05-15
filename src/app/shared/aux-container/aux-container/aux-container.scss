@@ -6,4 +6,21 @@
     gap: 0.2rem;
     width: 100%;
     background-color: vars.$bg-primary;
+    
+    // Su smartphone: layout orizzontale con scroll
+    @media (max-width: 767px) {
+        flex-direction: row !important;
+        gap: 0.5rem !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        padding: 0.5rem !important;
+        width: 100% !important;
+        
+        button {
+            flex: 1 0 auto !important;
+            min-width: 80px !important;
+            max-width: none !important;
+            white-space: nowrap !important;
+        }
+    }
 }

@@ -1,14 +1,16 @@
-import { Component, Input, Output, EventEmitter, HostListener, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, OnDestroy, AfterViewInit, ElementRef, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { KnobComponent } from '../../knob/knob';
 
 @Component({
   selector: 'app-vertical-slider',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, KnobComponent],
   templateUrl: './vertical-slider.html',
-  styleUrls: ['./vertical-slider.scss']
+  styleUrls: ['./vertical-slider.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class VerticalSlider implements OnDestroy {
+export class VerticalSlider implements OnDestroy, AfterViewInit {
   @Input() value: number = 0;
   @Input() min: number = -90; // -∞ rappresentato come -90
   @Input() max: number = 10;
@@ -25,6 +27,44 @@ export class VerticalSlider implements OnDestroy {
   private trackElement: HTMLElement | null = null;
   private autoRepeatInterval: any = null;
   private autoRepeatTimeout: any = null;
+  
+  // Modalità compatta (knob invece di fader)
+  useCompactMode: boolean = false;
+  hideSublabel: boolean = false; // Nasconde sublabel sotto i 400px
+  hideLabel: boolean = false; // Nasconde anche il label sotto i 100px
+  private resizeObserver?: ResizeObserver;
+  
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private elementRef: ElementRef
+  ) {}
+  
+  ngAfterViewInit() {
+    this.checkHeight();
+    
+    // Osserva i cambiamenti di dimensione
+    this.resizeObserver = new ResizeObserver(() => {
+      this.checkHeight();
+    });
+    
+    this.resizeObserver.observe(this.elementRef.nativeElement);
+  }
+  
+  private checkHeight() {
+    const height = this.elementRef.nativeElement.offsetHeight;
+    const shouldUseCompact = height < 320;
+    const shouldHideSublabel = height < 150;
+    const shouldHideLabel = height < 100;
+    
+    if (this.useCompactMode !== shouldUseCompact ||
+        this.hideSublabel !== shouldHideSublabel ||
+        this.hideLabel !== shouldHideLabel) {
+      this.useCompactMode = shouldUseCompact;
+      this.hideSublabel = shouldHideSublabel;
+      this.hideLabel = shouldHideLabel;
+      this.cdr.markForCheck();
+    }
+  }
   
   /**
    * Converte il valore in dB alla percentuale dello slider (0-100%)
@@ -194,13 +234,14 @@ export class VerticalSlider implements OnDestroy {
     this.updateValue(dbValue);
   }
   
-  private updateValue(newValue: number): void {
+  updateValue(newValue: number): void {
     newValue = Math.max(this.min, Math.min(this.max, newValue));
     newValue = Math.round(newValue / this.step) * this.step;
     
     if (this.value !== newValue) {
       this.value = newValue;
       this.valueChange.emit(this.value);
+      this.cdr.markForCheck(); // Trigger change detection only when value changes
     }
   }
   
@@ -245,6 +286,11 @@ export class VerticalSlider implements OnDestroy {
   
   ngOnDestroy(): void {
     this.stopAutoRepeat();
+    
+    // Cleanup ResizeObserver
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
   }
   
   toggleMute(): void {

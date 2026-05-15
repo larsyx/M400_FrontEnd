@@ -11,31 +11,31 @@ export const MENU_ITEMS: MenuItem[] = [
     {
         label: 'Fader',
         route: '/app/mixer/home',
-        icon: 'home',
+        icon: 'sliders',
         roles: [UserRole.MIXER]
     },
     {
         label: 'DCA',
         route: '/app/mixer/dca',
-        icon: 'dca',
+        icon: 'grid-3x3',
         roles: [UserRole.MIXER]
     },
     {
         label: 'Home',
         route: '/app/video/home',
-        icon: 'home',
+        icon: 'house-door',
         roles: [UserRole.VIDEO]
     },
     {
         label: 'Home',
         route: '/app/user/home',
-        icon: 'home',
+        icon: 'house-door',
         roles: [UserRole.USER]
     },
     {
         label: 'Dashboard',
         route: '/app/admin/dashboard',
-        icon: 'dashboard',
+        icon: 'speedometer2',
         roles: [UserRole.ADMIN]
     },
     {
@@ -47,13 +47,13 @@ export const MENU_ITEMS: MenuItem[] = [
     {
         label: 'Scene',
         route: '/app/mixer/scene',
-        icon: 'people',
+        icon: 'collection',
         roles: [UserRole.ADMIN, UserRole.MIXER]
     },
     {
         label: 'Profili',
         route: '/app/user/profile',
-        icon: 'assessment',
+        icon: 'person-circle',
         roles: [UserRole.USER]
     }
 ];
