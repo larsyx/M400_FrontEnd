@@ -1,0 +1,23 @@
+<div class="scenes-container">
+  <div class="scenes-header">
+    <h1 class="scenes-title">
+      <i class="bi bi-collection"></i>
+      Scene
+    </h1>
+    <p class="scenes-subtitle">Gestisci e richiama le scene salvate</p>
+  </div>
+
+  <div class="scenes-list">
+    @for (scene of scenes; track scene.id) {
+      <app-scene-card 
+        [scene]="scene"
+        (recallScene)="onRecallScene($event)">
+      </app-scene-card>
+    } @empty {
+      <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <p>Nessuna scena disponibile</p>
+      </div>
+    }
+  </div>
+</div>

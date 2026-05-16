@@ -1,0 +1,15 @@
+<div class="scene-card">
+  <div class="scene-card-content">
+    <div class="scene-info">
+      <span class="scene-id">ID: {{ scene.id }}</span>
+      <h3 class="scene-name">{{ scene.name }}</h3>
+    </div>
+    <button 
+      class="recall-button" 
+      (click)="onRecallClick()"
+      type="button">
+      <i class="bi bi-play-circle"></i>
+      <span>Richiama</span>
+    </button>
+  </div>
+</div>

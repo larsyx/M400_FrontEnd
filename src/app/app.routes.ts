@@ -12,6 +12,9 @@ const loadHomePage = () => import('./features/mixer/home-page/home-page')
 const loadDcaPage = () => import('./features/mixer/pages/dca/dca')
                 .then(m => m.Dca);
 
+const loadScenesPage = () => import('./features/mixer/pages/scenes/scenes')
+                .then(m => m.ScenesComponent);
+
 const loadProfilePage = () => import('./features/profile/profile')
                 .then(m => m.ProfileComponent);
 
@@ -56,7 +59,7 @@ export const routes: Routes = [
                     },
                     {
                         'path' : 'scene',
-                        loadComponent : loadHomePage
+                        loadComponent : loadScenesPage
                     }
                 ]
             },

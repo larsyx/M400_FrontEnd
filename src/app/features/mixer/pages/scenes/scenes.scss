@@ -1,0 +1,153 @@
+@import '../../../../../styles/variables';
+
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.scenes-container {
+  padding: $spacing-xl;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+
+  // Custom scrollbar styling
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+    
+    &:hover {
+      background: #555;
+    }
+  }
+}
+
+.scenes-header {
+  margin-bottom: $spacing-xl;
+  text-align: center;
+}
+
+.scenes-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-md;
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  margin: 0 0 $spacing-sm 0;
+
+  i {
+    font-size: 2rem;
+    color: $primary-color;
+  }
+}
+
+.scenes-subtitle {
+  font-size: $font-size-base;
+  color: $text-secondary;
+  margin: 0;
+}
+
+.scenes-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xxl;
+  text-align: center;
+  color: $text-secondary;
+
+  i {
+    font-size: 4rem;
+    margin-bottom: $spacing-lg;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: $font-size-lg;
+    margin: 0;
+  }
+}
+
+// Dark theme support
+:host-context(.dark-theme) {
+  .scenes-container {
+    &::-webkit-scrollbar-track {
+      background: #1a202c;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #4a5568;
+      
+      &:hover {
+        background: #63b3ed;
+      }
+    }
+  }
+
+  .scenes-title {
+    color: #f7fafc;
+
+    i {
+      color: #63b3ed;
+    }
+  }
+
+  .scenes-subtitle {
+    color: #a0aec0;
+  }
+
+  .empty-state {
+    color: #a0aec0;
+  }
+}
+
+// Responsive design
+@media (max-width: $breakpoint-md) {
+  .scenes-container {
+    padding: $spacing-lg;
+  }
+
+  .scenes-title {
+    font-size: $font-size-xl;
+
+    i {
+      font-size: 1.5rem;
+    }
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .scenes-container {
+    padding: $spacing-md;
+  }
+
+  .scenes-header {
+    margin-bottom: $spacing-lg;
+  }
+
+  .scenes-list {
+    gap: $spacing-sm;
+  }
+}
