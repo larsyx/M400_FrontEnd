@@ -1,0 +1,11 @@
+<div class="settings-card">
+  <div class="settings-card-header">
+    @if (icon) {
+      <i class="bi bi-{{ icon }} settings-card-icon"></i>
+    }
+    <h3 class="settings-card-title">{{ title }}</h3>
+  </div>
+  <div class="settings-card-body">
+    <ng-content></ng-content>
+  </div>
+</div>

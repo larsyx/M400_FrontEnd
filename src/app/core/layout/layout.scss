@@ -44,4 +44,11 @@
   :host {
     padding-bottom: 40px;
   }
+
+// Dark Theme Support
+:host-context(.dark-theme) {
+  .main-content {
+    background: #1a202c;
+  }
+}
 }

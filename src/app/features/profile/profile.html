@@ -1,0 +1,80 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <h1 class="profile-title">
+      <i class="bi bi-person-circle me-2"></i>
+      @if (currentUser) {
+        {{ currentUser.username }}
+      }
+    </h1>
+  </div>
+
+  <div class="settings-grid">
+    <!-- Theme Toggle Card -->
+    <app-settings-card title="Tema" icon="palette">
+      <div class="setting-content">
+        <p class="setting-description">
+          Scegli tra tema chiaro e scuro per personalizzare l'interfaccia
+        </p>
+        <div class="theme-toggle-container">
+          <div class="theme-option" [class.active]="!themeService.isDarkTheme()">
+            <i class="bi bi-sun-fill"></i>
+            <span>Chiaro</span>
+          </div>
+          <label class="theme-switch">
+            <input 
+              type="checkbox" 
+              [checked]="themeService.isDarkTheme()"
+              (change)="onThemeToggle()"
+            >
+            <span class="theme-slider"></span>
+          </label>
+          <div class="theme-option" [class.active]="themeService.isDarkTheme()">
+            <i class="bi bi-moon-stars-fill"></i>
+            <span>Scuro</span>
+          </div>
+        </div>
+      </div>
+    </app-settings-card>
+
+    <!-- Slider Width Card -->
+    <app-settings-card title="Larghezza Slider" icon="arrows-expand">
+      <div class="setting-content">
+        <p class="setting-description">
+          Regola la larghezza degli slider verticali <strong>{{ sliderWidth() }}px</strong>
+        </p>
+        <div class="slider-container">
+          <div class="slider-labels">
+            <span class="slider-label">60px</span>
+            <span class="slider-label">130px</span>
+          </div>
+          <input 
+            type="range" 
+            class="width-slider"
+            min="60" 
+            max="130" 
+            [value]="sliderWidth()"
+            (input)="onSliderChange($event)"
+          >
+          <div class="slider-preview" [style.width.px]="sliderWidth()">
+            <div class="preview-content">
+              <i class="bi bi-sliders"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </app-settings-card>
+
+    <!-- Logout Card -->
+    <app-settings-card title="Sessione" icon="box-arrow-right">
+      <div class="setting-content">
+        <p class="setting-description">
+          Termina la sessione corrente e torna alla schermata di login
+        </p>
+        <button class="btn-logout" (click)="onLogout()">
+          <i class="bi bi-box-arrow-right me-2"></i>
+          Logout
+        </button>
+      </div>
+    </app-settings-card>
+  </div>
+</div>

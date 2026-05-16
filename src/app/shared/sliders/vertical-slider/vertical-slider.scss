@@ -3,14 +3,15 @@
 :host {
   display: block;
   height: 100%; // ✅ Prende il 100% dell'altezza dal parent
+  cursor: pointer;
 }
 
 .vertical-slider {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem; 
+  gap: 0.5rem;
   align-items: center;
-  width: 130px;
+  // width is now set dynamically via [style.width.px]
   padding: vars.$spacing-md;
   background: vars.$bg-primary;
   border-radius: vars.$border-radius-xl;
@@ -18,9 +19,17 @@
   user-select: none;
   border: 1px solid vars.$border-color;
   height: 100%;
+  transition: all 0.3s ease;
   
   &.muted {
     opacity: 0.5;
+  }
+  
+  &.selected {
+    border-color: var(--bs-primary);
+    border-width: 2px;
+    box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.2), vars.$box-shadow;
+    background: rgba(var(--bs-primary-rgb), 0.05);
   }
 }
 
@@ -254,5 +263,102 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
+  }
+}
+
+// Dark Theme Support
+:host-context(.dark-theme) {
+  .vertical-slider {
+    background: #2d3748;
+    border-color: #4a5568;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+    
+    &.selected {
+      border-color: #63b3ed;
+      box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.3), 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+      background: rgba(99, 179, 237, 0.1);
+    }
+  }
+
+  .slider-label {
+    color: #f7fafc;
+
+    &.clickable {
+      &:hover {
+        background: #4a5568;
+        color: #63b3ed;
+      }
+
+      &.muted-label {
+        background: #e53e3e;
+        color: #f7fafc;
+
+        &:hover {
+          background: #c53030;
+        }
+      }
+    }
+  }
+
+  .slider-sublabel {
+    color: #a0aec0;
+  }
+
+  .value-display {
+    background: #1a202c;
+    border-color: #4a5568;
+
+    .value,
+    .unit {
+      color: #63b3ed;
+    }
+  }
+
+  .increment-btn,
+  .decrement-btn {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #f7fafc;
+
+    &:hover {
+      background: #63b3ed;
+      color: #1a202c;
+      border-color: #63b3ed;
+    }
+  }
+
+  .slider-track {
+    background: #1a202c;
+    border-color: #4a5568;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .track-fill {
+    background: linear-gradient(180deg, #63b3ed 0%, #3182ce 100%);
+  }
+
+  .slider-thumb {
+    background: #2d3748;
+    border-color: #63b3ed;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+  }
+
+  .mute-button {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #f7fafc;
+
+    &:hover {
+      background: #4a5568;
+    }
+
+    &.active {
+      background: #e53e3e;
+      border-color: #e53e3e;
+
+      &:hover {
+        background: #c53030;
+      }
+    }
   }
 }

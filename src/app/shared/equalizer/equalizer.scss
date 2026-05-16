@@ -646,4 +646,153 @@
     padding: 0.5rem;
     gap: 0.5rem;
   }
+
+// Dark Theme Support
+:host-context(.dark-theme) {
+  .equalizer {
+    background: #2d3748;
+    border-color: #4a5568;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+  }
+
+  .edit-icon-button {
+    background: #1a202c;
+    border-color: #4a5568;
+    color: #f7fafc;
+
+    &:hover {
+      background: #2d3748;
+      border-color: #63b3ed;
+      color: #63b3ed;
+    }
+
+    &.active {
+      background: #63b3ed;
+      color: #1a202c;
+      border-color: #63b3ed;
+    }
+  }
+
+  .eq-graph {
+    border-color: #4a5568;
+    background: #1a202c;
+  }
+
+  .graph-bg {
+    fill: #2d3748;
+  }
+
+  .grid-line {
+    stroke: #4a5568;
+
+    &.zero-line {
+      stroke: #a0aec0;
+    }
+  }
+
+  .grid-label {
+    fill: #a0aec0;
+  }
+
+  .eq-curve {
+    stroke: #63b3ed;
+  }
+
+  .band-point {
+    stroke: #f7fafc;
+  }
+
+  .band-label-text {
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.9);
+  }
+
+  .eq-bands-compact {
+    &::-webkit-scrollbar-track {
+      background: #1a202c;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #4a5568;
+
+      &:hover {
+        background: #63b3ed;
+      }
+    }
+  }
+
+  .eq-band-compact {
+    background: #1a202c;
+    border-color: #4a5568;
+  }
+
+  .band-label-compact {
+    background: #2d3748;
+    color: #f7fafc;
+  }
+
+  .control-label-compact {
+    color: #a0aec0;
+  }
+
+  .value-display {
+    background: #1a202c;
+    border-color: #4a5568;
+    color: #f7fafc;
+  }
+
+  .eq-modal-overlay,
+  .knobs-modal-overlay {
+    background: rgba(0, 0, 0, 0.9);
+  }
+
+  .eq-modal-content,
+  .knobs-modal-content {
+    background: #2d3748;
+  }
+
+  .eq-modal-header,
+  .knobs-modal-header {
+    background: #1a202c;
+    border-bottom-color: #4a5568;
+  }
+
+  .eq-modal-title,
+  .knobs-modal-title {
+    color: #f7fafc;
+  }
+
+  .eq-graph-modal {
+    background: #1a202c;
+    border-bottom-color: #4a5568;
+  }
+
+  .eq-modal-body,
+  .knobs-modal-body {
+    &::-webkit-scrollbar-track {
+      background: #1a202c;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #4a5568;
+
+      &:hover {
+        background: #63b3ed;
+      }
+    }
+  }
+
+  .eq-band-modal {
+    background: #1a202c;
+    border-color: #4a5568;
+  }
+
+  .band-label-modal {
+    background: #2d3748;
+    color: #f7fafc;
+  }
+
+  .control-label-modal {
+    color: #a0aec0;
+  }
+}
 }

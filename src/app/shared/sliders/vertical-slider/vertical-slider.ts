@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, HostListener, OnDestroy, AfterViewInit, ElementRef, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, OnDestroy, AfterViewInit, ElementRef, ChangeDetectionStrategy, ChangeDetectorRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { KnobComponent } from '../../knob/knob';
+import { SliderSettingsService } from '../../../core/services/slider-settings.service';
 
 @Component({
   selector: 'app-vertical-slider',
@@ -19,6 +20,7 @@ export class VerticalSlider implements OnDestroy, AfterViewInit {
   @Input() sublabel?: string;
   @Input() muted: boolean = false;
   @Input() showMuteButton: boolean = true;
+  @Input() isSelected: boolean = false;
   
   @Output() valueChange = new EventEmitter<number>();
   @Output() muteChange = new EventEmitter<boolean>();
@@ -34,10 +36,20 @@ export class VerticalSlider implements OnDestroy, AfterViewInit {
   hideLabel: boolean = false; // Nasconde anche il label sotto i 100px
   private resizeObserver?: ResizeObserver;
   
+  // Dynamic width from settings
+  currentWidth: number = 60;
+  
   constructor(
     private cdr: ChangeDetectorRef,
-    private elementRef: ElementRef
-  ) {}
+    private elementRef: ElementRef,
+    private sliderSettings: SliderSettingsService
+  ) {
+    // React to width changes
+    effect(() => {
+      this.currentWidth = this.sliderSettings.sliderWidth();
+      this.cdr.markForCheck();
+    });
+  }
   
   ngAfterViewInit() {
     this.checkHeight();

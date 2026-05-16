@@ -22,9 +22,9 @@
             <span class="navbar-text me-3 text-white">
               {{ currentUser.username }}
             </span>
-            <button class="btn btn-outline-light btn-sm" (click)="logout()">
-              <i class="bi bi-box-arrow-right"></i> Logout
-            </button>
+            <a class="btn btn-outline-light btn-sm" [routerLink]="['/app/profile']">
+              <i class="bi bi-person-circle"></i> Profilo
+            </a>
           </div>
         </li>
       </ul>
@@ -50,9 +50,9 @@
         </a>
       }
       
-      <a class="mobile-nav-item" (click)="logout()">
-        <i class="bi bi-box-arrow-right"></i>
-        <span class="mobile-nav-label">Logout</span>
+      <a class="mobile-nav-item" [routerLink]="['/app/profile']" routerLinkActive="active">
+        <i class="bi bi-person-circle"></i>
+        <span class="mobile-nav-label">Profilo</span>
       </a>
     </div>
   }

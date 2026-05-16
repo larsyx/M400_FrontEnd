@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-aux-container',
@@ -7,6 +7,8 @@ import { Component } from '@angular/core';
   styleUrl: './aux-container.scss',
 })
 export class AuxContainer {
+
+  @Output() selectionChange = new EventEmitter<number>();
 
   auxs = [
     {
@@ -80,6 +82,7 @@ export class AuxContainer {
 
   select(index: number) {
     this.selectedIndex = index;
+    this.selectionChange.emit(index);
   }
 
 }

@@ -200,6 +200,34 @@
   }
 }
 
+// Dark theme support via class
+:host-context(.dark-theme) {
+  .knob-value-text {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    color: #f7fafc;
+  }
+  
+  .knob-focus-ring {
+    border-color: #63b3ed;
+    box-shadow: 0 0 0 2px rgba(99, 179, 237, 0.3);
+  }
+
+  .knob-container {
+    &:not(.knob-disabled):not(.knob-readonly):hover {
+      .knob-canvas {
+        filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.4));
+      }
+    }
+
+    &:active,
+    &.knob-dragging {
+      .knob-canvas {
+        filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.5));
+      }
+    }
+  }
+}
+
 // High contrast mode support
 @media (prefers-contrast: high) {
   .knob-container {

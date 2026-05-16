@@ -1,4 +1,4 @@
-<div class="vertical-slider" [class.muted]="muted" [class.compact-mode]="useCompactMode">
+<div class="vertical-slider" [class.muted]="muted" [class.compact-mode]="useCompactMode" [class.selected]="isSelected" [style.width.px]="currentWidth">
   
   @if (useCompactMode) {
     <div class="compact-container">

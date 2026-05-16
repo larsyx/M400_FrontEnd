@@ -12,6 +12,9 @@ const loadHomePage = () => import('./features/mixer/home-page/home-page')
 const loadDcaPage = () => import('./features/mixer/pages/dca/dca')
                 .then(m => m.Dca);
 
+const loadProfilePage = () => import('./features/profile/profile')
+                .then(m => m.ProfileComponent);
+
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
     {
@@ -19,6 +22,10 @@ export const routes: Routes = [
         component: LayoutComponent,
         canActivate: [authGuard],
         children: [
+            {
+                path: 'profile',
+                loadComponent: loadProfilePage
+            },
             {
                 path: 'admin',
                 canActivate: [roleGuard],
@@ -71,10 +78,6 @@ export const routes: Routes = [
                 children: [
                     {
                         'path' : 'home',
-                        loadComponent: loadHomePage
-                    },
-                    {
-                        'path' : 'profile',
                         loadComponent: loadHomePage
                     }
                 ]

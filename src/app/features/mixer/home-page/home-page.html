@@ -1,12 +1,28 @@
 <div class="home-page">
 
   <div class="bottom-menu">
-    <button class="btn btn-outline-primary" [class.active]="activeView === HomeViewButtons.EQ" (click)="setView(HomeViewButtons.EQ)">
-      EQ
-    </button>
-    <button class="btn btn-outline-primary" [class.active]="activeView === HomeViewButtons.DCA" (click)="setView(HomeViewButtons.DCA)">
-      DCA
-    </button>
+    <div class="button-group left-group">
+      <button class="btn btn-outline-primary" [class.active]="activeView === HomeViewButtons.EQ" (click)="setView(HomeViewButtons.EQ)">
+        EQ
+      </button>
+      <button class="btn btn-outline-primary" [class.active]="activeView === HomeViewButtons.DCA" (click)="setView(HomeViewButtons.DCA)">
+        DCA
+      </button>
+    </div>
+    
+    <div class="button-group right-group">
+      <button class="btn btn-outline-primary"
+              [class.active]="sidePanelMode === 'main'"
+              (click)="setSidePanelMode('main')">
+        MAIN
+      </button>
+      <button class="btn btn-outline-primary aux-button"
+              [class.active]="sidePanelMode === 'aux'"
+              (click)="setSidePanelMode('aux')">
+        <span class="aux-label">AUX</span>
+        <span class="aux-name">{{ selectedAuxName }}</span>
+      </button>
+    </div>
   </div>
 
   <div class="content-section"
@@ -25,7 +41,16 @@
 
     <div class="main-fader">
       <app-sliders-container></app-sliders-container>
-      <app-aux-container></app-aux-container>
+      
+      @if (sidePanelMode === 'aux') {
+      <app-aux-container
+        (selectionChange)="onAuxSelectionChange($event)">
+      </app-aux-container>
+      }
+
+      @if (sidePanelMode === 'main') {
+      <app-main-container></app-main-container>
+      }
     </div>
   </div>
 

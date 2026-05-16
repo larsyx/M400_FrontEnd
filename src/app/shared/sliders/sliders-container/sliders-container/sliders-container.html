@@ -1,5 +1,5 @@
 <div class="mixer-channels">
-      @for(channel of channels; track i; let i = $index){
+      @for(channel of channels; track channel.id; let i = $index){
       <app-vertical-slider
         [label]="channel.label"
         [sublabel]="channel.sublabel"
@@ -9,8 +9,10 @@
         [max]="10"
         [step]="0.1"
         [showMuteButton]="true"
+        [isSelected]="isSelected(channel.id)"
         (valueChange)="onValueChange(i, $event)"
-        (muteChange)="onMuteChange(i, $event)">
+        (muteChange)="onMuteChange(i, $event)"
+        (click)="selectSlider(channel.id)">
       </app-vertical-slider>
     }
     </div>

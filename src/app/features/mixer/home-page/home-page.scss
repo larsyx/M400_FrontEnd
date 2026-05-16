@@ -31,13 +31,29 @@
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: clamp(0.25rem, 1vw, 0.5rem);
+  gap: clamp(0.5rem, 1.5vw, 1rem);
   padding: clamp(0.4rem, 1vw, 0.6rem);
   border-bottom: 2px solid #dee2e6;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 0.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  
+  .button-group {
+    display: flex;
+    gap: clamp(0.25rem, 1vw, 0.5rem);
+    align-items: center;
+    padding: clamp(0.3rem, 0.8vw, 0.5rem);
+    background: rgba(169, 166, 166, 0.03);
+    border-radius: 0.4rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+  }
   
   button {
     display: flex;
@@ -58,6 +74,45 @@
     white-space: nowrap;
     min-width: clamp(55px, 12vw, 75px);
     
+    // Custom AUX button styling
+    &.aux-button {
+      position: relative;
+      overflow: visible;
+      
+      // "AUX" label in the border
+      &::before {
+        content: 'AUX';
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: clamp(0.4rem, 0.8vw, 0.5rem);
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        padding: 1px clamp(0.3rem, 0.7vw, 0.4rem);
+        background: var(--bs-primary);
+        color: white;
+        border-radius: 0.2rem;
+        opacity: 0.85;
+        transition: opacity 0.3s ease;
+        z-index: 1;
+      }
+      
+      &.active::before {
+        opacity: 1;
+      }
+      
+      .aux-label {
+        display: none;
+      }
+      
+      .aux-name {
+        font-size: clamp(0.7rem, 1.6vw, 0.85rem);
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+    }
+    
     &.active {
       background: var(--bs-primary);
       color: white;
@@ -76,6 +131,7 @@
       transform: scale(0.98);
     }
   }
+
 }
 
 // ===== CONTENT SECTION (Main area with EQ/DCA and Faders) =====
@@ -255,6 +311,15 @@
     
     app-aux-container {
       grid-column: 1;
+
+  // When AUX is hidden, sliders take full width
+  &.aux-hidden {
+    grid-template-columns: 1fr;
+    
+    app-sliders-container {
+      grid-column: 1;
+    }
+  }
       grid-row: 1;
       width: 100% !important;
       height: auto !important;
@@ -331,19 +396,22 @@
     padding: 0.4rem;
     gap: 0.4rem;
     border-bottom-width: 1px;
+    justify-content: center;
+    
+    .button-group {
+      gap: 0.4rem;
+      
+      &.left-group,
+      &.right-group {
+        justify-content: center;
+      }
+    }
     
     button {
       font-size: 0.7rem;
       padding: 0.35rem 0.7rem;
       min-width: 55px;
       letter-spacing: 0.3px;
-      
-      // Hide DCA button on portrait orientation (smartphone vertical)
-      &:nth-child(2) {
-        @media (orientation: portrait) {
-          display: none;
-        }
-      }
     }
   }
   
@@ -499,4 +567,84 @@
   .main-fader {
     border-width: 1.5px;
   }
+
+// Dark Theme Support
+:host-context(.dark-theme) {
+  .home-page {
+    background: #1a202c;
+  }
+
+  .bottom-menu {
+    background: rgba(45, 55, 72, 0.95);
+    border-bottom-color: #4a5568;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    .button-group {
+      background: rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.1);
+      
+      &:hover {
+        background: rgba(0, 0, 0, 0.3);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      }
+    }
+
+    button {
+      border-color: #63b3ed;
+      color: #63b3ed;
+
+      &.active {
+        background: #63b3ed;
+        color: #1a202c;
+        border-color: #63b3ed;
+        box-shadow: 0 4px 16px rgba(99, 179, 237, 0.4);
+      }
+
+      &:hover:not(.active) {
+        background: rgba(99, 179, 237, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+      
+      &.aux-button::before {
+        background: #63b3ed;
+        color: #1a202c;
+      }
+    }
+  }
+
+  .eq-container,
+  .dca-container {
+    background: rgba(45, 55, 72, 0.98);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .main-fader {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    border-color: #4a5568;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    app-aux-container {
+      background: rgba(26, 32, 44, 0.95);
+      border-left-color: #4a5568;
+      box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+
+      &::-webkit-scrollbar-thumb {
+        background: #4a5568;
+
+        &:hover {
+          background: #63b3ed;
+        }
+      }
+
+      @media (max-width: 767px) {
+        border-bottom-color: #4a5568;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+}
 }
