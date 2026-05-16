@@ -1,0 +1,64 @@
+<div class="horizontal-slider" [class.muted]="muted">
+  
+  <!-- Header: Nome, Label e dB in orizzontale -->
+  <div class="slider-header">
+    <div class="slider-label"
+         [class.clickable]="showMuteButton"
+         [class.muted-label]="showMuteButton && muted"
+         (click)="showMuteButton ? toggleMute() : null">
+      {{ label }}
+    </div>
+    
+    @if (sublabel) {
+      <div class="slider-sublabel">{{ sublabel }}</div>
+    }
+    
+    <div class="value-display">
+      <span class="value">{{ getFormattedValue() }}</span>
+      <span class="unit">dB</span>
+    </div>
+  </div>
+  
+  <!-- Slider e bottoni in basso -->
+  <div class="slider-controls">
+    <!-- Bottone - -->
+    <button class="decrement-btn"
+            (mousedown)="startAutoRepeat('decrement')"
+            (mouseup)="stopAutoRepeat()"
+            (mouseleave)="stopAutoRepeat()"
+            (touchstart)="startAutoRepeat('decrement')"
+            (touchend)="stopAutoRepeat()"
+            type="button">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 13H5v-2h14v2z"/>
+      </svg>
+    </button>
+    
+    <!-- Slider Track -->
+    <div class="slider-container">
+      <div class="slider-track">
+        <div class="track-fill" [style.width.%]="getThumbPosition()"></div>
+        
+        <div class="slider-thumb"
+             [style.left.%]="getThumbPosition()"
+             (mousedown)="onThumbMouseDown($event)"
+             (touchstart)="onThumbTouchStart($event)">
+        </div>
+      </div>
+    </div>
+    
+    <!-- Bottone + -->
+    <button class="increment-btn"
+            (mousedown)="startAutoRepeat('increment')"
+            (mouseup)="stopAutoRepeat()"
+            (mouseleave)="stopAutoRepeat()"
+            (touchstart)="startAutoRepeat('increment')"
+            (touchend)="stopAutoRepeat()"
+            type="button">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+      </svg>
+    </button>
+  </div>
+  
+</div>
