@@ -50,6 +50,13 @@ export const MENU_ITEMS: MenuItem[] = [
         icon: 'collection',
         roles: [UserRole.ADMIN, UserRole.MIXER]
     },
+
+    {
+        label: 'Scene',
+        route: '/app/user/scene',
+        icon: 'collection',
+        roles: [UserRole.USER]
+    },
     {
         label: 'Profili',
         route: '/app/user/profile',

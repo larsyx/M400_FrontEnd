@@ -1,44 +1,58 @@
-import { Component } from '@angular/core';
+import { Component, signal, effect, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { VerticalSlider } from '../../vertical-slider/vertical-slider';
+import { HorizontalSlider } from '../../horizontal-slider/horizontal-slider';
+import { SliderSettingsService, SliderOrientation } from '../../../../core/services/slider-settings.service';
+import { Fader } from '../../../../core/models/fader.model';
 
 @Component({
   selector: 'app-sliders-container',
-  imports: [VerticalSlider],
+  imports: [CommonModule, VerticalSlider, HorizontalSlider],
   templateUrl: './sliders-container.html',
   styleUrl: './sliders-container.scss',
 })
 export class SlidersContainer {
-    channels = [
-    { id: 0, label: 'CH 1', sublabel: 'Bass', value: -12, muted: false },
-    { id: 1, label: 'CH 2', sublabel: 'Guitar', value: -6, muted: false },
-    { id: 2, label: 'CH 3', sublabel: 'Vocals', value: 0, muted: false },
-    { id: 3, label: 'CH 4', sublabel: 'Drums', value: -18, muted: true },
-    
-    { id: 4, label: 'CH 5', sublabel: 'Bass', value: -12, muted: false },
-    { id: 5, label: 'CH 6', sublabel: 'Guitar', value: -6, muted: false },
-    { id: 6, label: 'CH 7', sublabel: 'Vocals', value: 0, muted: false },
-    { id: 7, label: 'CH 8', sublabel: 'Drums', value: -18, muted: true },
-    
-    { id: 8, label: 'CH 9', sublabel: 'Bass', value: -12, muted: false },
-    { id: 9, label: 'CH 10', sublabel: 'Guitar', value: -6, muted: false },
-    { id: 10, label: 'CH 11', sublabel: 'Vocals', value: 0, muted: false },
-    { id: 11, label: 'CH 12', sublabel: 'Drums', value: -18, muted: true },
-    
-    { id: 12, label: 'MAIN', sublabel: 'Master', value: -3, muted: false }
+  sliderOrientation = signal<SliderOrientation>('vertical');
+
+  @Input() channels: Fader[] = [
+    { id: 0, name: 'CH 1', description: 'Bass', value: -12, switch: false,link: false },
+    { id: 1, name: 'CH 2', description: 'Guitar', value: -6, switch: false, link: false },
+    { id: 2, name: 'CH 3', description: 'Vocals', value: 0, switch: false, link: false },
+    { id: 3, name: 'CH 4', description: 'Drums', value: -18, switch: true, link: false }, 
+    { id: 4, name: 'CH 5', description: 'Bass', value: -12, switch: false, link: false },
+    { id: 5, name: 'CH 6', description: 'Guitar', value: -6, switch: false, link: false },
+    { id: 6, name: 'CH 7', description: 'Vocals', value: 0, switch: false, link: false },
+    { id: 7, name: 'CH 8', description: 'Drums', value: -18, switch: true, link: false },
+    { id: 8, name: 'CH 9', description: 'Bass', value: -12, switch: false, link: false },
+    { id: 9, name: 'CH 10', description: 'Guitar', value: -6, switch: false, link: false },
+    { id: 10, name: 'CH 11', description: 'Vocals', value: 0, switch: false, link: false },
+    { id: 11, name: 'CH 12', description: 'Drums', value: -18, switch: true, link: false }
   ];
 
   selectedSliderId: number | null = null;
+
+  constructor(private sliderSettings: SliderSettingsService) {
+    // Sync with slider settings service
+    effect(() => {
+      this.sliderOrientation.set(this.sliderSettings.sliderOrientation());
+    });
+  }
+  
+  ngOnInit(): void {
+    // Initialize from service
+    this.sliderOrientation.set(this.sliderSettings.getOrientation());
+  }
 
   onValueChange(index: number, newValue: number): void {
     this.channels[index].value = newValue;
     // Select slider when value changes
     this.selectSlider(this.channels[index].id);
-    console.log(`${this.channels[index].label}: ${newValue.toFixed(1)} dB`);
+    console.log(`${this.channels[index].description}: ${newValue.toFixed(1)} dB`);
   }
 
   onMuteChange(index: number, muted: boolean): void {
-    this.channels[index].muted = muted;
-    console.log(`${this.channels[index].label}: ${muted ? 'Muted' : 'Unmuted'}`);
+    this.channels[index].switch = muted;
+    console.log(`${this.channels[index].description}: ${muted ? 'Muted' : 'Unmuted'}`);
   }
 
   selectSlider(id: number): void {

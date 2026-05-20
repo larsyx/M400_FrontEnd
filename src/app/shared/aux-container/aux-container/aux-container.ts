@@ -1,4 +1,6 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit, Input } from '@angular/core';
+import { MixerService } from '../../../core/services/mixer.service';
+import { IAuxs } from '../../../core/models/auxs.model';
 
 @Component({
   selector: 'app-aux-container',
@@ -6,78 +8,10 @@ import { Component, Output, EventEmitter } from '@angular/core';
   templateUrl: './aux-container.html',
   styleUrl: './aux-container.scss',
 })
-export class AuxContainer {
-
+export class AuxContainer{
+  @Input() auxs: IAuxs[] = [];
   @Output() selectionChange = new EventEmitter<number>();
 
-  auxs = [
-    {
-      id : 1,
-      name : "aux-1"
-    },
-    {
-      id : 2,
-      name : "aux-2"
-    },
-    {
-      id : 3,
-      name : "aux-3"
-    },
-    {
-      id : 4,
-      name : "aux-4"
-    },
-        {
-      id : 1,
-      name : "aux-1"
-    },
-    {
-      id : 2,
-      name : "aux-2"
-    },
-    {
-      id : 3,
-      name : "aux-3"
-    },
-    {
-      id : 4,
-      name : "aux-4"
-    },
-        {
-      id : 1,
-      name : "aux-1"
-    },
-    {
-      id : 2,
-      name : "aux-2"
-    },
-    {
-      id : 3,
-      name : "aux-3"
-    },
-    {
-      id : 4,
-      name : "aux-4"
-    },
-        {
-      id : 1,
-      name : "aux-1"
-    },
-    {
-      id : 2,
-      name : "aux-2"
-    },
-    {
-      id : 3,
-      name : "aux-3"
-    },
-    {
-      id : 4,
-      name : "aux-4"
-    }
-  ];
-
-  
   selectedIndex: number = -1;
 
   select(index: number) {

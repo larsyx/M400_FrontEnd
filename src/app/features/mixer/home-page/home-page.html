@@ -35,15 +35,16 @@
     
     @if (activeView === HomeViewButtons.DCA) {
       <div class="dca-container">
-        <app-dca></app-dca>
+        <app-dca [dca]="dcaList"></app-dca>
       </div>
     }
 
     <div class="main-fader">
-      <app-sliders-container></app-sliders-container>
+      <app-sliders-container [channels]="faderList"></app-sliders-container>
       
       @if (sidePanelMode === 'aux') {
-      <app-aux-container
+      <app-aux-container 
+        [auxs]="auxList"
         (selectionChange)="onAuxSelectionChange($event)">
       </app-aux-container>
       }

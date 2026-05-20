@@ -106,4 +106,89 @@ body.dark-theme {
       }
     }
   }
+
+  // Home Page Bottom Menu
+  .bottom-menu {
+    background: rgba(45, 55, 72, 0.95) !important;
+    border-bottom-color: #4a5568 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+
+    .button-group {
+      background: rgba(0, 0, 0, 0.2) !important;
+      border-color: rgba(255, 255, 255, 0.1) !important;
+      
+      &:hover {
+        background: rgba(0, 0, 0, 0.3) !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+      }
+    }
+
+    button {
+      border-color: #63b3ed !important;
+      color: #63b3ed !important;
+
+      &.active {
+        background: #63b3ed !important;
+        color: #1a202c !important;
+        border-color: #63b3ed !important;
+        box-shadow: 0 4px 16px rgba(99, 179, 237, 0.4) !important;
+      }
+
+      &:hover:not(.active) {
+        background: rgba(99, 179, 237, 0.1) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+      }
+      
+      &.aux-button::before {
+        background: #63b3ed !important;
+        color: #1a202c !important;
+      }
+    }
+  }
+
+  // Home Page - Main Fader and Sliders
+  .home-page {
+    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%) !important;
+  }
+
+  .main-fader {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+    border-color: #4a5568 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+
+    &:hover {
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+  }
+
+  // EQ Container
+  .eq-container {
+    background: rgba(45, 55, 72, 0.98) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  // AUX Container
+  app-aux-container {
+    background: rgba(26, 32, 44, 0.95) !important;
+    border-left-color: #4a5568 !important;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2) !important;
+
+    &::-webkit-scrollbar-thumb {
+      background: #4a5568 !important;
+
+      &:hover {
+        background: #63b3ed !important;
+      }
+    }
+
+    @media (max-width: 767px) {
+      border-bottom-color: #4a5568 !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+    }
+  }
+
+  // Sliders Container
+  app-sliders-container {
+    background: rgba(26, 32, 44, 0.5) !important;
+  }
 }

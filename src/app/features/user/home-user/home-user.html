@@ -1,0 +1,118 @@
+<div class="user-home-page">
+  <!-- Header with tabs and controls -->
+  <div class="header-controls">
+    <!-- Top row: MAIN and AUX controls (mobile only) -->
+    <div class="top-controls">
+      <!-- Toggle Main Container button -->
+      <button
+        type="button"
+        class="control-button toggle-main icon-only"
+        [class.active]="showMainContainer"
+        (click)="toggleMainContainer()"
+        title="Toggle Main Container"
+        aria-label="Toggle Main Container">
+        <i class="bi bi-sliders"></i>
+      </button>
+      
+      <!-- AUX selector -->
+      <app-custom-select
+        class="aux-select"
+        [options]="auxOptions"
+        [value]="selectedAux"
+        [ariaLabel]="'Select AUX output'"
+        [placeholder]="'Select AUX'"
+        (valueChange)="onAuxChange($event)">
+      </app-custom-select>
+    </div>
+    
+    <!-- Main row: Tabs and controls -->
+    <div class="main-row">
+      <!-- Tabs for filtering -->
+      <div class="tabs-container">
+        @for (tab of tabs; track tab.id) {
+          <button
+            class="tab-button"
+            [class.active]="activeTab === tab.id"
+            (click)="selectTab(tab.id)">
+            <span class="tab-icon">{{ tab.icon }}</span>
+            <span class="tab-label">{{ tab.label }}</span>
+          </button>
+        }
+      </div>
+      
+      <!-- Right controls (desktop only) -->
+      <div class="right-controls">
+        <!-- Toggle Main Container button -->
+        <button
+          type="button"
+          class="control-button toggle-main icon-only"
+          [class.active]="showMainContainer"
+          (click)="toggleMainContainer()"
+          title="Toggle Main Container"
+          aria-label="Toggle Main Container">
+          <i class="bi bi-sliders"></i>
+        </button>
+        
+        <!-- AUX selector -->
+        <app-custom-select
+          class="aux-select"
+          [options]="auxOptions"
+          [value]="selectedAux"
+          [ariaLabel]="'Select AUX output'"
+          [placeholder]="'Select AUX'"
+          (valueChange)="onAuxChange($event)">
+        </app-custom-select>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Main content area with sliders and optional main container -->
+  <div class="main-content" [class.horizontal-layout]="sliderOrientation() === 'horizontal'">
+    <div class="sliders-wrapper">
+      @if (sliderOrientation() === 'vertical') {
+        <!-- Vertical sliders -->
+        <div class="vertical-sliders-container">
+          @for(channel of channels; track channel.id; let i = $index){
+            <app-vertical-slider
+              [label]="channel.label"
+              [sublabel]="channel.sublabel"
+              [value]="channel.value"
+              [muted]="channel.muted"
+              [min]="-90"
+              [max]="10"
+              [step]="0.1"
+              [showMuteButton]="true"
+              [isSelected]="isSelected(channel.id)"
+              (valueChange)="onValueChange(i, $event)"
+              (muteChange)="onMuteChange(i, $event)"
+              (click)="selectSlider(channel.id)">
+            </app-vertical-slider>
+          }
+        </div>
+      } @else {
+        <!-- Horizontal sliders -->
+        <div class="horizontal-sliders-container">
+          @for(channel of channels; track channel.id; let i = $index){
+            <app-horizontal-slider
+              [label]="channel.label"
+              [sublabel]="channel.sublabel"
+              [value]="channel.value"
+              [muted]="channel.muted"
+              [min]="-90"
+              [max]="10"
+              [step]="0.1"
+              [showMuteButton]="true"
+              (valueChange)="onValueChange(i, $event)"
+              (muteChange)="onMuteChange(i, $event)"
+              (click)="selectSlider(channel.id)">
+            </app-horizontal-slider>
+          }
+        </div>
+      }
+    </div>
+    
+    @if (showMainContainer) {
+      <app-main-container></app-main-container>
+    }
+  </div>
+</div>

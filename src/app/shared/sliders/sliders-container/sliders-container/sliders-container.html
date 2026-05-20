@@ -1,10 +1,12 @@
-<div class="mixer-channels">
-      @for(channel of channels; track channel.id; let i = $index){
+<div class="mixer-channels" [class.horizontal-layout]="sliderOrientation() === 'horizontal'">
+  @if (sliderOrientation() === 'vertical') {
+    <!-- Vertical sliders -->
+    @for(channel of channels; track channel.id; let i = $index){
       <app-vertical-slider
-        [label]="channel.label"
-        [sublabel]="channel.sublabel"
+        [label]="channel.name"
+        [sublabel]="channel.description"
         [value]="channel.value"
-        [muted]="channel.muted"
+        [muted]="channel.switch"
         [min]="-90"
         [max]="10"
         [step]="0.1"
@@ -15,4 +17,22 @@
         (click)="selectSlider(channel.id)">
       </app-vertical-slider>
     }
-    </div>
+  } @else {
+    <!-- Horizontal sliders -->
+    @for(channel of channels; track channel.id; let i = $index){
+      <app-horizontal-slider
+        [label]="channel.name"
+        [sublabel]="channel.description"
+        [value]="channel.value"
+        [muted]="channel.switch"
+        [min]="-90"
+        [max]="10"
+        [step]="0.1"
+        [showMuteButton]="true"
+        (valueChange)="onValueChange(i, $event)"
+        (muteChange)="onMuteChange(i, $event)"
+        (click)="selectSlider(channel.id)">
+      </app-horizontal-slider>
+    }
+  }
+</div>

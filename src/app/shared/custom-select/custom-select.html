@@ -1,0 +1,36 @@
+<div class="custom-select" [class.open]="isOpen()" [class.disabled]="disabled">
+  <button
+    type="button"
+    class="custom-select-trigger"
+    [attr.aria-label]="ariaLabel"
+    [attr.aria-expanded]="isOpen()"
+    [disabled]="disabled"
+    (click)="toggleDropdown()">
+    <span class="custom-select-value" [class.placeholder]="!selectedOption">
+      {{ selectedOption?.label || placeholder }}
+    </span>
+
+    <span class="custom-select-icon" aria-hidden="true">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+      </svg>
+    </span>
+  </button>
+
+  @if (isOpen()) {
+    <div class="custom-select-dropdown">
+      @for (option of options; track trackByValue($index, option)) {
+        <button
+          type="button"
+          class="custom-select-option"
+          [class.selected]="option.value === value"
+          (click)="selectOption(option)">
+          <span>{{ option.label }}</span>
+          @if (option.value === value) {
+            <span class="checkmark">✓</span>
+          }
+        </button>
+      }
+    </div>
+  }
+</div>

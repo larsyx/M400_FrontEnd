@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
-import { SliderSettingsService } from '../../core/services/slider-settings.service';
+import { SliderSettingsService, SliderOrientation } from '../../core/services/slider-settings.service';
 import { SettingsCardComponent } from '../../shared/settings-card/settings-card';
 import { User } from '../../core/models/user.model';
 
@@ -18,6 +18,7 @@ import { User } from '../../core/models/user.model';
 export class ProfileComponent implements OnInit {
   currentUser: User | null = null;
   sliderWidth = signal<number>(60);
+  sliderOrientation = signal<SliderOrientation>('vertical');
 
   constructor(
     private authService: AuthService,
@@ -28,6 +29,7 @@ export class ProfileComponent implements OnInit {
     // Sync with slider settings service
     effect(() => {
       this.sliderWidth.set(this.sliderSettings.sliderWidth());
+      this.sliderOrientation.set(this.sliderSettings.sliderOrientation());
     });
   }
 
@@ -35,6 +37,7 @@ export class ProfileComponent implements OnInit {
     this.currentUser = this.authService.getCurrentUser();
     // Initialize from service
     this.sliderWidth.set(this.sliderSettings.getWidth());
+    this.sliderOrientation.set(this.sliderSettings.getOrientation());
   }
 
   onThemeToggle(): void {
@@ -46,6 +49,11 @@ export class ProfileComponent implements OnInit {
     const width = parseInt(value, 10);
     this.sliderWidth.set(width);
     this.sliderSettings.setWidth(width);
+  }
+  
+  onOrientationChange(orientation: SliderOrientation): void {
+    this.sliderOrientation.set(orientation);
+    this.sliderSettings.setOrientation(orientation);
   }
 
   onLogout(): void {

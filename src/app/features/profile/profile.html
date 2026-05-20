@@ -64,6 +64,31 @@
       </div>
     </app-settings-card>
 
+    <!-- Slider Orientation Card -->
+    <app-settings-card title="Orientamento Slider" icon="arrows-angle-expand">
+      <div class="setting-content">
+        <p class="setting-description">
+          Scegli l'orientamento degli slider: verticale o orizzontale
+        </p>
+        <div class="orientation-toggle-container">
+          <button
+            class="orientation-option"
+            [class.active]="sliderOrientation() === 'vertical'"
+            (click)="onOrientationChange('vertical')">
+            <i class="bi bi-sliders2-vertical"></i>
+            <span>Verticale</span>
+          </button>
+          <button
+            class="orientation-option"
+            [class.active]="sliderOrientation() === 'horizontal'"
+            (click)="onOrientationChange('horizontal')">
+            <i class="bi bi-sliders2"></i>
+            <span>Orizzontale</span>
+          </button>
+        </div>
+      </div>
+    </app-settings-card>
+
     <!-- Logout Card -->
     <app-settings-card title="Sessione" icon="box-arrow-right">
       <div class="setting-content">

@@ -5,6 +5,9 @@ import { LayoutComponent } from './core/layout/layout';
 import { UserRole } from './core/models/user.model';
 import { roleGuard } from './core/auth/role.guard';
 import path from 'path';
+import { SCENE_SERVICE } from './core/services/scene.service.interface';
+import { MixerSceneService } from './core/services/mixer-scene.service';
+import { UserSceneService } from './core/services/user-scene.service';
 
 const loadHomePage = () => import('./features/mixer/home-page/home-page')
                 .then(m => m.HomePageComponent);
@@ -12,11 +15,14 @@ const loadHomePage = () => import('./features/mixer/home-page/home-page')
 const loadDcaPage = () => import('./features/mixer/pages/dca/dca')
                 .then(m => m.Dca);
 
-const loadScenesPage = () => import('./features/mixer/pages/scenes/scenes')
+const loadScenesPage = () => import('./shared/scenes/scenes')
                 .then(m => m.ScenesComponent);
 
 const loadProfilePage = () => import('./features/profile/profile')
                 .then(m => m.ProfileComponent);
+
+const loadUserHomePage = () => import('./features/user/home-user/home-user')
+                .then(m => m.HomeUserComponent);
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -59,7 +65,10 @@ export const routes: Routes = [
                     },
                     {
                         'path' : 'scene',
-                        loadComponent : loadScenesPage
+                        loadComponent : loadScenesPage,
+                        providers: [
+                            { provide: SCENE_SERVICE, useClass: MixerSceneService }
+                        ]
                     }
                 ]
             },
@@ -81,7 +90,14 @@ export const routes: Routes = [
                 children: [
                     {
                         'path' : 'home',
-                        loadComponent: loadHomePage
+                        loadComponent: loadUserHomePage
+                    },
+                    {
+                        'path' : 'scene',
+                        loadComponent : loadScenesPage,
+                        providers: [
+                            { provide: SCENE_SERVICE, useClass: UserSceneService }
+                        ]
                     }
                 ]
             }

@@ -239,6 +239,59 @@
   font-size: 2rem;
 }
 
+// Orientation Toggle Styles
+.orientation-toggle-container {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.orientation-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem 1rem;
+  background: white;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  font-weight: 500;
+
+  i {
+    font-size: 2rem;
+    transition: all 0.3s ease;
+  }
+
+  &:hover:not(.active) {
+    border-color: #007bff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+  }
+
+  &.active {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border-color: #007bff;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(0, 123, 255, 0.4);
+
+    i {
+      transform: scale(1.1);
+    }
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
 // Logout Button Styles
 .btn-logout {
   width: 100%;
@@ -340,6 +393,28 @@
 
   .slider-labels {
     color: #a0aec0;
+  }
+
+  .orientation-toggle-container {
+    background: #1a202c;
+  }
+
+  .orientation-option {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #a0aec0;
+
+    &:hover:not(.active) {
+      border-color: #63b3ed;
+      box-shadow: 0 4px 12px rgba(99, 179, 237, 0.2);
+    }
+
+    &.active {
+      background: linear-gradient(135deg, #63b3ed 0%, #3182ce 100%);
+      border-color: #63b3ed;
+      color: #1a202c;
+      box-shadow: 0 4px 16px rgba(99, 179, 237, 0.4);
+    }
   }
 }
 

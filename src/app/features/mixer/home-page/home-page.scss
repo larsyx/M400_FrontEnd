@@ -571,7 +571,7 @@
 // Dark Theme Support
 :host-context(.dark-theme) {
   .home-page {
-    background: #1a202c;
+    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
   }
 
   .bottom-menu {
@@ -625,6 +625,10 @@
 
     &:hover {
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    app-sliders-container {
+      background: rgba(26, 32, 44, 0.5);
     }
 
     app-aux-container {
