@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
 import { SlidersContainer } from '../../../shared/sliders/sliders-container/sliders-container/sliders-container';
 import { AuxContainer } from '../../../shared/aux-container/aux-container/aux-container';
@@ -8,6 +8,7 @@ import { Dca } from "../pages/dca/dca";
 import { MixerService } from '../../../core/services/mixer.service';
 import { Fader } from '../../../core/models/fader.model';
 import { IAuxs } from '../../../core/models/auxs.model';
+import { WebSocketService } from '../../../core/services/websocket.service';
 
 @Component({
   selector: 'app-home-page',
@@ -16,7 +17,7 @@ import { IAuxs } from '../../../core/models/auxs.model';
   templateUrl: './home-page.html',
   styleUrls: ['./home-page.scss']
 })
-export class HomePageComponent implements OnInit{
+export class HomePageComponent implements OnInit, OnDestroy{
   HomeViewButtons = HomeViewButtons;
   activeView: HomeViewButtons | null = null;
 
@@ -34,7 +35,12 @@ export class HomePageComponent implements OnInit{
   dcaList: Fader[] = [];
   auxList: IAuxs[] = []
 
-  constructor(private mixerService : MixerService){}
+  constructor(
+    private mixerService : MixerService,
+    private webSocketService: WebSocketService
+  ){}
+  
+
 
   ngOnInit(): void {
     this.mixerService.loadFader().subscribe({
@@ -53,7 +59,23 @@ export class HomePageComponent implements OnInit{
       next : (res) => {
         this.auxList = res;
       }
-    })
+    });
+
+    
+    const token = localStorage.getItem('access_token'); // o dove lo hai
+
+    this.webSocketService.connect(token!);
+
+    this.webSocketService.messages().subscribe(msg => {
+      if (msg.type === 'slider_update') {
+        console.log(msg.payload);
+      }
+    });
+
+  }
+
+  ngOnDestroy(): void {
+    this.webSocketService.disconnect();
   }
 
   // Rileva se siamo su smartphone
@@ -96,6 +118,22 @@ export class HomePageComponent implements OnInit{
       this.selectedAuxName = this.auxContainer.auxs[index]?.name || 'AUX';
     }
   }
+
+  
+  updateFader(fader: Fader) {
+
+    this.webSocketService.send({
+      type: 'slider_update',
+      payload: {
+        channel: fader.id,
+        value: fader.value.toFixed(1),
+        switch: fader.switch
+      }
+    });
+  }
+
+
+
 }
 
 export enum HomeViewButtons {

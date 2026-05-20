@@ -40,7 +40,7 @@
     }
 
     <div class="main-fader">
-      <app-sliders-container [channels]="faderList"></app-sliders-container>
+      <app-sliders-container [channels]="faderList" (faderChange)="updateFader($event)"></app-sliders-container>
       
       @if (sidePanelMode === 'aux') {
       <app-aux-container 

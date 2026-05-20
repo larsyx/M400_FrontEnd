@@ -1,4 +1,4 @@
-import { Component, signal, effect, Input } from '@angular/core';
+import { Component, signal, effect, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VerticalSlider } from '../../vertical-slider/vertical-slider';
 import { HorizontalSlider } from '../../horizontal-slider/horizontal-slider';
@@ -29,6 +29,9 @@ export class SlidersContainer {
     { id: 11, name: 'CH 12', description: 'Drums', value: -18, switch: true, link: false }
   ];
 
+  @Output() faderChange = new EventEmitter<Fader>();
+  
+
   selectedSliderId: number | null = null;
 
   constructor(private sliderSettings: SliderSettingsService) {
@@ -47,7 +50,9 @@ export class SlidersContainer {
     this.channels[index].value = newValue;
     // Select slider when value changes
     this.selectSlider(this.channels[index].id);
-    console.log(`${this.channels[index].description}: ${newValue.toFixed(1)} dB`);
+    //console.log(`${this.channels[index].description}: ${newValue.toFixed(1)} dB`);
+    this.faderChange.emit(this.channels[index])
+  
   }
 
   onMuteChange(index: number, muted: boolean): void {
