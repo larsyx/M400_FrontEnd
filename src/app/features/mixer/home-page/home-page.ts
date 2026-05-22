@@ -9,6 +9,7 @@ import { MixerService } from '../../../core/services/mixer.service';
 import { Fader } from '../../../core/models/fader.model';
 import { IAuxs } from '../../../core/models/auxs.model';
 import { TypeRequest, TypeSocket, WebSocketService } from '../../../core/services/websocket.service';
+import { auditTime, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-home-page',
@@ -37,6 +38,7 @@ export class HomePageComponent implements OnInit, OnDestroy{
   mainFader!: Fader;
   auxList: IAuxs[] = [];
   token = localStorage.getItem('access_token');
+  private faderUpdate$ = new Subject<{ fader: Fader, type: TypeRequest }>();
 
   constructor(
     private mixerService : MixerService,
@@ -79,6 +81,22 @@ export class HomePageComponent implements OnInit, OnDestroy{
     this.webSocketService.messages().subscribe(msg => {
       console.log(msg.payload);
     });
+
+    this.faderUpdate$
+      .pipe(
+        auditTime(30)
+      )
+      .subscribe(event => {
+        this.webSocketService.send({
+          type: event.type,
+          payload: {
+            aux_id: this.selectedAuxName,
+            channel: event.fader.id,
+            value: event.fader.value.toFixed(1),
+            switch: !event.fader.switch
+          }
+        });
+      });
   }
 
   ngOnDestroy(): void {
@@ -134,16 +152,7 @@ export class HomePageComponent implements OnInit, OnDestroy{
 
   
   updateFader(event: {fader: Fader, type: TypeRequest}) {
-
-    this.webSocketService.send({
-      type: event.type,
-      payload: {
-        aux_id: this.selectedAuxName,
-        channel: event.fader.id,
-        value: event.fader.value.toFixed(1),
-        switch: !event.fader.switch
-      }
-    });
+    this.faderUpdate$.next(event);
   }
 }
 

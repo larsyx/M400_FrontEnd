@@ -3,6 +3,7 @@ import { SlidersContainer } from '../../../../shared/sliders/sliders-container/s
 import { Fader } from '../../../../core/models/fader.model';
 import { MixerService } from '../../../../core/services/mixer.service';
 import { TypeRequest, TypeSocket, WebSocketService } from '../../../../core/services/websocket.service';
+import { auditTime, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-dca',
@@ -15,6 +16,8 @@ export class Dca implements OnInit {
 
   @Input() dca: Fader[] = [];
   token = localStorage.getItem('access_token');
+  private faderUpdate$ = new Subject<{ fader: Fader, type: TypeRequest }>();
+  
 
   constructor(private mixerService: MixerService, private webSocketService: WebSocketService){}
 
@@ -32,22 +35,30 @@ export class Dca implements OnInit {
     this.webSocketService.messages().subscribe(msg => {
       console.log(msg.payload);
     });
+
+    this.faderUpdate$
+      .pipe(
+        auditTime(30)
+      )
+      .subscribe(event => {
+        this.webSocketService.send({
+          type: event.type,
+          payload: {
+            channel: event.fader.id,
+            value: event.fader.value.toFixed(1),
+            switch: event.fader.switch
+          }
+        });
+      });
   }
 
 
   onFaderUpdate(event: {fader: Fader, type: TypeRequest}){
     if(event.type == TypeRequest.SLIDER_VALUE)
-      event.type = TypeRequest.DCA_VALUE
+      event.type = TypeRequest.DCA_VALUE;
     if(event.type == TypeRequest.SLIDER_SWITCH)
-      event.type = TypeRequest.DCA_SWITCH
+      event.type = TypeRequest.DCA_SWITCH;
 
-    this.webSocketService.send({
-      type: event.type,
-      payload: {
-        channel: event.fader.id,
-        value: event.fader.value.toFixed(1),
-        switch: event.fader.switch
-      }
-    });
+    this.faderUpdate$.next(event);
   }
 }
