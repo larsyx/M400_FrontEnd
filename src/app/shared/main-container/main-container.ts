@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VerticalSlider } from '../sliders/vertical-slider/vertical-slider';
+import { Fader } from '../../core/models/fader.model';
+import { TypeRequest } from '../../core/services/websocket.service';
 
 @Component({
   selector: 'app-main-container',
@@ -10,10 +12,16 @@ import { VerticalSlider } from '../sliders/vertical-slider/vertical-slider';
   styleUrl: './main-container.scss'
 })
 export class MainContainer {
-  mainValue: number = 0;
+  @Input() fader!: Fader;
+  @Output() faderChange = new EventEmitter<{fader: Fader, type: TypeRequest}>();
 
   onValueChange(value: number): void {
-    this.mainValue = value;
-    console.log('Main value:', value);
+    this.fader.value = value;
+    this.faderChange.emit({fader: this.fader!, type: TypeRequest.SLIDER_VALUE});
+  }
+
+  onSwitchChange(value: boolean): void {
+    this.fader.switch = value;
+    this.faderChange.emit({fader: this.fader!, type: TypeRequest.SLIDER_VALUE});
   }
 }

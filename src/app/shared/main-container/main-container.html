@@ -1,14 +1,16 @@
 <div class="main-container">
   <div class="main-slider-wrapper">
     <app-vertical-slider
-      [value]="mainValue"
+      [value]="fader.value"
       [min]="-90"
       [max]="10"
-      [step]="0.5"
+      [step]="0.1"
       [label]="'MAIN'"
       [sublabel]="'Master'"
-      [showMuteButton]="false"
-      (valueChange)="onValueChange($event)">
+      [showMuteButton]="true"
+      [muted]="fader.switch"
+      (valueChange)="onValueChange($event)"
+      (muteChange)="onSwitchChange($event)">
     </app-vertical-slider>
   </div>
 </div>

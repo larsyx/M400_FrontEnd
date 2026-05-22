@@ -8,7 +8,7 @@ import { Dca } from "../pages/dca/dca";
 import { MixerService } from '../../../core/services/mixer.service';
 import { Fader } from '../../../core/models/fader.model';
 import { IAuxs } from '../../../core/models/auxs.model';
-import { WebSocketService } from '../../../core/services/websocket.service';
+import { TypeRequest, TypeSocket, WebSocketService } from '../../../core/services/websocket.service';
 
 @Component({
   selector: 'app-home-page',
@@ -27,13 +27,16 @@ export class HomePageComponent implements OnInit, OnDestroy{
   // Side panel mode: 'aux' or 'main'
   sidePanelMode: 'aux' | 'main' | null = null;
   selectedAuxName: string = 'Main';
+  selectedAuxId: number = 0;
 
   @ViewChild(Equalizer) equalizerComponent?: Equalizer;
   @ViewChild(AuxContainer) auxContainer?: AuxContainer;
 
   faderList: Fader[] = [];
   dcaList: Fader[] = [];
-  auxList: IAuxs[] = []
+  mainFader!: Fader;
+  auxList: IAuxs[] = [];
+  token = localStorage.getItem('access_token');
 
   constructor(
     private mixerService : MixerService,
@@ -44,8 +47,18 @@ export class HomePageComponent implements OnInit, OnDestroy{
 
   ngOnInit(): void {
     this.mixerService.loadFader().subscribe({
-      next: (res) =>{
-        this.faderList = res;
+      next: (res) => {  
+        this.mainFader = res.find(f => f.id === 0) ?? {
+          id: 0,
+          name: '',
+          description: '',
+          value: 0,
+          switch: false,
+          link: false
+        };
+
+        res.forEach(f => f.switch = !f.switch)
+        this.faderList = res.filter(f => f.id !== 0);
       }
     });
 
@@ -61,17 +74,11 @@ export class HomePageComponent implements OnInit, OnDestroy{
       }
     });
 
-    
-    const token = localStorage.getItem('access_token'); // o dove lo hai
-
-    this.webSocketService.connect(token!);
+    this.webSocketService.connect(this.token!, TypeSocket.MIXER);
 
     this.webSocketService.messages().subscribe(msg => {
-      if (msg.type === 'slider_update') {
-        console.log(msg.payload);
-      }
+      console.log(msg.payload);
     });
-
   }
 
   ngOnDestroy(): void {
@@ -114,26 +121,30 @@ export class HomePageComponent implements OnInit, OnDestroy{
   onAuxSelectionChange(index: number): void {
     if (index === -1) {
       this.selectedAuxName = 'Main';
+      this.webSocketService.disconnect();
+      this.webSocketService.connect(this.token!, TypeSocket.MIXER);
     } else if (this.auxContainer) {
-      this.selectedAuxName = this.auxContainer.auxs[index]?.name || 'AUX';
+      const aux = this.auxContainer.auxs[index];
+      this.selectedAuxName = aux?.name || 'AUX';
+
+      this.webSocketService.disconnect();
+      this.webSocketService.connect(this.token!, TypeSocket.AUX, aux.id);
     }
   }
 
   
-  updateFader(fader: Fader) {
+  updateFader(event: {fader: Fader, type: TypeRequest}) {
 
     this.webSocketService.send({
-      type: 'slider_update',
+      type: event.type,
       payload: {
-        channel: fader.id,
-        value: fader.value.toFixed(1),
-        switch: fader.switch
+        aux_id: this.selectedAuxName,
+        channel: event.fader.id,
+        value: event.fader.value.toFixed(1),
+        switch: !event.fader.switch
       }
     });
   }
-
-
-
 }
 
 export enum HomeViewButtons {

@@ -1,1 +1,5 @@
-  <app-sliders-container [channels]="dca" class="dca-container"></app-sliders-container>
+  <app-sliders-container 
+    [channels]="dca" 
+    class="dca-container" 
+    (faderChange)="onFaderUpdate($event)">
+  </app-sliders-container>
