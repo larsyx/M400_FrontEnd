@@ -79,7 +79,17 @@ export class HomePageComponent implements OnInit, OnDestroy{
     this.webSocketService.connect(this.token!, TypeSocket.MIXER);
 
     this.webSocketService.messages().subscribe(msg => {
-      console.log(msg.payload);
+      const fader = msg.payload.channel.dca ? 
+        this.dcaList.find(f => f.id === msg.payload.channel) : 
+        this.faderList.find(f => f.id === msg.payload.channel);
+      
+      if (fader) {
+        if (msg.payload.value === true || msg.payload.value === false){
+          fader.switch = !msg.payload.value;
+        }
+        else
+          fader.value = parseFloat(msg.payload.value);
+      }
     });
 
     this.faderUpdate$
