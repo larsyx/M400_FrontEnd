@@ -35,4 +35,9 @@ export class MixerService{
     const url = this.API_URL + "/aux"
     return this.http.get<IAuxs[]>(url)
   }
+
+  loadValues(auxId: number){
+    const url = this.API_URL + `/aux/${auxId}`;
+    return this.http.get<Fader[]>(url);
+  }
 }

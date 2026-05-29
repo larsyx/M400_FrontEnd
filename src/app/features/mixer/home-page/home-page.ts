@@ -133,6 +133,8 @@ export class HomePageComponent implements OnInit, OnDestroy{
       this.manageMessage();
     } else if (this.auxContainer) {
       const aux = this.auxContainer.auxs[index];
+      this.syncChannelsValues(aux.id);
+
       this.selectedAuxName = aux?.name || 'AUX';
 
       this.webSocketService.disconnect();
@@ -157,6 +159,20 @@ export class HomePageComponent implements OnInit, OnDestroy{
           else
             fader.value = parseFloat(msg.payload.value);
         }
+    });
+  }
+
+  syncChannelsValues(auxId: number){
+    this.mixerService.loadValues(auxId).subscribe({
+      next: (res) => {  
+        res.forEach(f => {
+          const item = this.faderList.find(v => v.id === f.id);
+          if (item) {
+            item.switch = !f.switch;
+            item.value = f.value;
+          }
+        });
+      }
     });
   }
 }
