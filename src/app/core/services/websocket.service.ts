@@ -1,6 +1,8 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Observable, Subject } from "rxjs";
 import { environment } from "../../../environments/environment.development";
+import { LoaderService } from "./loader.service";
+import { UserRole } from "../models/user.model";
 
 export interface SocketMessage<T = any> {
   type: string;
@@ -26,21 +28,27 @@ export enum TypeRequest{
 })
 export class WebSocketService {
 
-  private WS_URL = environment.wsUrl + '/ws/' 
+  private WS_URL = environment.wsUrl + '/ws/'
   private socket!: WebSocket;
   private messages$ = new Subject<SocketMessage>();
+  private loader = inject(LoaderService);
+  private connectingShown = false;
 
-  connect(token: string, type: TypeSocket, aux_id?: number) {
+    connect(token: string, type: TypeSocket, role : UserRole, aux_id?: number) {
     this.socket = new WebSocket(this.WS_URL + type);
+
+    this.loader.show();
+    this.connectingShown = true;
 
     this.socket.onopen = () => {
       console.log('✅ WebSocket connessa');
+      this.releaseConnectingLoader();
 
       this.send({
         type: 'auth',
         payload: {
           token: token,
-          role: "mixer",
+          role: role,
           aux_id:  aux_id
         }
       });
@@ -53,11 +61,20 @@ export class WebSocketService {
 
     this.socket.onerror = (err) => {
       console.error('❌ WS errore', err);
+      this.releaseConnectingLoader();
     };
 
     this.socket.onclose = () => {
       console.warn('⚠️ WS chiusa');
+      this.releaseConnectingLoader();
     };
+  }
+
+  private releaseConnectingLoader() {
+    if (this.connectingShown) {
+      this.connectingShown = false;
+      this.loader.hide();
+    }
   }
 
   send<T>(message: SocketMessage<T>) {
@@ -74,5 +91,6 @@ export class WebSocketService {
 
   disconnect() {
     this.socket?.close();
+    this.releaseConnectingLoader();
   }
 }

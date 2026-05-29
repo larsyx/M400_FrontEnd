@@ -69,27 +69,6 @@
   gap: $spacing-md;
 }
 
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: $spacing-xxl;
-  text-align: center;
-  color: $text-secondary;
-
-  i {
-    font-size: 4rem;
-    margin-bottom: $spacing-lg;
-    opacity: 0.5;
-  }
-
-  p {
-    font-size: $font-size-lg;
-    margin: 0;
-  }
-}
-
 // Dark theme support
 :host-context(.dark-theme) {
   .scenes-container {

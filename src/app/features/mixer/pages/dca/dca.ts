@@ -4,6 +4,7 @@ import { Fader } from '../../../../core/models/fader.model';
 import { MixerService } from '../../../../core/services/mixer.service';
 import { TypeRequest, TypeSocket, WebSocketService } from '../../../../core/services/websocket.service';
 import { auditTime, Subject } from 'rxjs';
+import { UserRole } from '../../../../core/models/user.model';
 
 @Component({
   selector: 'app-dca',
@@ -30,7 +31,7 @@ export class Dca implements OnInit {
       });
     }
 
-    this.webSocketService.connect(this.token!, TypeSocket.MIXER);
+    this.webSocketService.connect(this.token!, TypeSocket.MIXER, UserRole.MIXER);
 
     this.webSocketService.messages().subscribe(msg => {
       console.log(msg.payload);

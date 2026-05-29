@@ -1,11 +1,19 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, distinctUntilChanged, map } from "rxjs";
 
 @Injectable({ providedIn: 'root' })
 export class LoaderService {
-  private _loading = new BehaviorSubject<boolean>(false);
-  loading$ = this._loading.asObservable();
+  private _pending = new BehaviorSubject<number>(0);
+  loading$ = this._pending.pipe(
+    map(n => n > 0),
+    distinctUntilChanged()
+  );
 
-  show() { this._loading.next(true); }
-  hide() { this._loading.next(false); }
+  show() {
+    this._pending.next(this._pending.value + 1);
+  }
+
+  hide() {
+    this._pending.next(Math.max(0, this._pending.value - 1));
+  }
 }

@@ -4,7 +4,7 @@
 @use "bootstrap/scss/bootstrap";
 
 // Import variables
-@use 'styles/variables';
+@use 'styles/variables' as *;
 
 /* Custom global styles */
 html, body {
@@ -187,5 +187,26 @@ body.dark-theme {
   // Sliders Container
   app-sliders-container {
     background: rgba(26, 32, 44, 0.5) !important;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xxl;
+  text-align: center;
+  color: $text-secondary;
+
+  i {
+    font-size: 4rem;
+    margin-bottom: $spacing-lg;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: $font-size-lg;
+    margin: 0;
   }
 }

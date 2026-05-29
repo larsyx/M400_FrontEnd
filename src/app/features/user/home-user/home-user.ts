@@ -1,15 +1,20 @@
 import { Component, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MainContainer } from '../../../shared/main-container/main-container';
-import { VerticalSlider } from '../../../shared/sliders/vertical-slider/vertical-slider';
-import { HorizontalSlider } from '../../../shared/sliders/horizontal-slider/horizontal-slider';
 import { CustomSelectComponent, CustomSelectOption } from '../../../shared/custom-select/custom-select';
 import { SliderSettingsService, SliderOrientation } from '../../../core/services/slider-settings.service';
+import { UserService } from '../../../core/services/user.service';
+import { Fader, TypeChannel } from '../../../core/models/fader.model';
+import { TypeRequest, TypeSocket, WebSocketService } from '../../../core/services/websocket.service';
+import { UserRole } from '../../../core/models/user.model';
+import { auditTime, Subject } from 'rxjs';
+import { SlidersContainer } from "../../../shared/sliders/sliders-container/sliders-container/sliders-container";
+import { IAuxs } from '../../../core/models/auxs.model';
 
 @Component({
   selector: 'app-home-user',
   standalone: true,
-  imports: [CommonModule, MainContainer, VerticalSlider, HorizontalSlider, CustomSelectComponent],
+  imports: [CommonModule, MainContainer, CustomSelectComponent, SlidersContainer],
   templateUrl: './home-user.html',
   styleUrls: ['./home-user.scss']
 })
@@ -17,32 +22,24 @@ export class HomeUserComponent {
   sliderOrientation = signal<SliderOrientation>('vertical');
   
   // Channel data
-  channels = [
-    { id: 0, label: 'CH 1', sublabel: 'Bass', value: -12, muted: false },
-    { id: 1, label: 'CH 2', sublabel: 'Guitar', value: -6, muted: false },
-    { id: 2, label: 'CH 3', sublabel: 'Vocals', value: 0, muted: false },
-    { id: 3, label: 'CH 4', sublabel: 'Drums', value: -18, muted: true },
-    { id: 4, label: 'CH 5', sublabel: 'Bass', value: -12, muted: false },
-    { id: 5, label: 'CH 6', sublabel: 'Guitar', value: -6, muted: false },
-    { id: 6, label: 'CH 7', sublabel: 'Vocals', value: 0, muted: false },
-    { id: 7, label: 'CH 8', sublabel: 'Drums', value: -18, muted: true },
-    { id: 8, label: 'CH 9', sublabel: 'Bass', value: -12, muted: false },
-    { id: 9, label: 'CH 10', sublabel: 'Guitar', value: -6, muted: false },
-    { id: 10, label: 'CH 11', sublabel: 'Vocals', value: 0, muted: false },
-    { id: 11, label: 'CH 12', sublabel: 'Drums', value: -18, muted: true },
-    { id: 12, label: 'MAIN', sublabel: 'Master', value: -3, muted: false }
-  ];
+  channels: Fader[] = [];
+  channelsSelected: Fader[] = [];
+  mainFader!: Fader;
+  sceneId: number | null = null;
+  token = localStorage.getItem('access_token');
+  auxUser?: IAuxs;
+  private faderUpdate$ = new Subject<{ fader: Fader, type: TypeRequest }>();
   
   selectedSliderId: number | null = null;
-  // Tab filters
+
   tabs = [
     { id: 'all', label: 'Tutti', icon: '🎵' },
-    { id: 'instruments', label: 'Strumenti', icon: '🎸' },
-    { id: 'vocals', label: 'Voci', icon: '🎤' },
-    { id: 'drums', label: 'Batteria', icon: '🥁' }
+    { id: TypeChannel.INSTRUMENT, label: 'Strumenti', icon: '🎸' },
+    { id: TypeChannel.VOICE, label: 'Voci', icon: '🎤' },
+    { id: TypeChannel.DRUM, label: 'Batteria', icon: '🥁' }
   ];
   
-  activeTab: string = 'all';
+  activeTab: string = "all";
   
   // Main container visibility toggle
   showMainContainer: boolean = false;
@@ -58,22 +55,96 @@ export class HomeUserComponent {
   
   selectedAux: string = 'main';
   
-  constructor(private sliderSettings: SliderSettingsService) {
-    // Sync with slider settings service
+  constructor(
+    private sliderSettings: SliderSettingsService,
+    private userService: UserService,
+    private webSocketService: WebSocketService
+  ) {
     effect(() => {
       this.sliderOrientation.set(this.sliderSettings.sliderOrientation());
     });
+
+    effect(() => {
+      const id = this.userService.currentSceneId();
+      if (id !== this.sceneId) {
+        this.sceneId = id;
+        if (id !== null) {
+          this.loadSceneData();
+        }
+      }
+    });
   }
-  
-  ngOnInit(): void {
-    // Initialize from service
+
+  private loadSceneData(): void {
     this.sliderOrientation.set(this.sliderSettings.getOrientation());
+
+    this.userService.loadHome(this.sceneId!).subscribe({
+      next: (res) => {  
+        //this.auxList = res.aux;
+
+        this.mainFader = res.fader.find(f => f.id === 0) ?? {
+          id: 0,
+          name: '',
+          description: '',
+          value: 0,
+          switch: false,
+          link: false,
+          type: null
+        };
+
+        res.fader.forEach(f => f.switch = !f.switch)
+        this.channels = res.fader.filter(f => f.id !== 0); 
+        this.channelsSelected = this.channels;
+
+        this.auxUser = res.auxUser;
+
+        this.webSocketService.connect(this.token!, TypeSocket.AUX, UserRole.USER, this.auxUser.id);
+
+        this.webSocketService.messages().subscribe(msg => {
+          const fader = this.channels.find(f => f.id === msg.payload.channel);
+
+            if(fader){
+              if(msg.payload.value === true || msg.payload.value === false)
+                fader.switch = !msg.payload.value;
+              else
+                fader.value = parseFloat(msg.payload.value);
+            }
+        });
+
+        this.faderUpdate$
+          .pipe(
+            auditTime(50)
+          )
+          .subscribe(event => {
+            this.webSocketService.send({
+              type: event.type,
+              payload: {
+                aux_id: this.auxUser?.id,
+                channel: event.fader.id,
+                value: event.fader.value.toFixed(1),
+                switch: !event.fader.switch
+              }
+            });
+          });
+      },
+      error: (err) => {
+        console.error('Errore nel caricamento dei dati:', err); // Debug
+      }
+    });
   }
   
+
+  ngOnDestroy(): void {
+    this.webSocketService.disconnect();
+  }
+
   // Switch to selected tab
-  selectTab(tabId: string): void {
+  selectTab(tabId: TypeChannel | string): void {
     this.activeTab = tabId;
-    console.log(`Active tab: ${tabId}`);
+    if(tabId === "all")
+      this.channelsSelected = this.channels;
+    else
+      this.channelsSelected = this.channels.filter(f => f.type === tabId);
   }
   
   // Toggle main container visibility
@@ -89,23 +160,16 @@ export class HomeUserComponent {
   }
   
   // Slider event handlers
-  onValueChange(index: number, newValue: number): void {
-    this.channels[index].value = newValue;
-    this.selectSlider(this.channels[index].id);
-    console.log(`${this.channels[index].label}: ${newValue.toFixed(1)} dB`);
-  }
-
-  onMuteChange(index: number, muted: boolean): void {
-    this.channels[index].muted = muted;
-    console.log(`${this.channels[index].label}: ${muted ? 'Muted' : 'Unmuted'}`);
-  }
-
   selectSlider(id: number): void {
     this.selectedSliderId = id;
-    console.log(`Selected slider ID: ${id}`);
+    //console.log(`Selected slider ID: ${id}`);
   }
 
   isSelected(id: number): boolean {
     return this.selectedSliderId === id;
+  }
+
+  updateFader(event: {fader: Fader, type: TypeRequest}) {
+    this.faderUpdate$.next(event);
   }
 }

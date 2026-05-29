@@ -4,5 +4,12 @@ export interface Fader{
     description: string,
     value: number,
     switch: boolean,
+    type: TypeChannel | null,
     link: boolean
+}
+
+export enum TypeChannel{
+    INSTRUMENT = "instrument",
+    DRUM = "drum",
+    VOICE = "voice"
 }

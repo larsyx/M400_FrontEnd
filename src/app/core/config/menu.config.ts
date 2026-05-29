@@ -27,12 +27,6 @@ export const MENU_ITEMS: MenuItem[] = [
         roles: [UserRole.VIDEO]
     },
     {
-        label: 'Home',
-        route: '/app/user/home',
-        icon: 'house-door',
-        roles: [UserRole.USER]
-    },
-    {
         label: 'Dashboard',
         route: '/app/admin/dashboard',
         icon: 'speedometer2',
@@ -49,8 +43,7 @@ export const MENU_ITEMS: MenuItem[] = [
         route: '/app/mixer/scene',
         icon: 'collection',
         roles: [UserRole.ADMIN, UserRole.MIXER]
-    },
-
+    },    
     {
         label: 'Scene',
         route: '/app/user/scene',
@@ -58,9 +51,9 @@ export const MENU_ITEMS: MenuItem[] = [
         roles: [UserRole.USER]
     },
     {
-        label: 'Profili',
-        route: '/app/user/profile',
-        icon: 'person-circle',
+        label: 'Mixer',
+        route: '/app/user/home',
+        icon: 'sliders',
         roles: [UserRole.USER]
     }
 ];

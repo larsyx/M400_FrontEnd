@@ -10,6 +10,7 @@ import { Fader } from '../../../core/models/fader.model';
 import { IAuxs } from '../../../core/models/auxs.model';
 import { TypeRequest, TypeSocket, WebSocketService } from '../../../core/services/websocket.service';
 import { auditTime, Subject } from 'rxjs';
+import { UserRole } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-home-page',
@@ -46,45 +47,33 @@ export class HomePageComponent implements OnInit, OnDestroy{
   ){}
   
 
-
   ngOnInit(): void {
-    this.mixerService.loadFader().subscribe({
+    this.mixerService.laodHome().subscribe({
       next: (res) => {  
-        this.mainFader = res.find(f => f.id === 0) ?? {
+        this.dcaList = res.dca;
+        this.auxList = res.aux;
+
+        this.mainFader = res.fader.find(f => f.id === 0) ?? {
           id: 0,
           name: '',
           description: '',
           value: 0,
           switch: false,
-          link: false
+          link: false,
+          type: null
         };
 
-        res.forEach(f => f.switch = !f.switch)
-        this.faderList = res.filter(f => f.id !== 0);
+        res.fader.forEach(f => f.switch = !f.switch)
+        this.faderList = res.fader.filter(f => f.id !== 0); 
       }
     });
 
-    this.mixerService.loadDca().subscribe({
-      next: (res) => {
-        this.dcaList = res;
-      }
-    });
-
-    this.mixerService.loadAux().subscribe({
-      next : (res) => {
-        this.auxList = res;
-      }
-    });
-
-    this.webSocketService.connect(this.token!, TypeSocket.MIXER);
-
-    this.webSocketService.messages().subscribe(msg => {
-      console.log(msg.payload);
-    });
+    this.webSocketService.connect(this.token!, TypeSocket.MIXER, UserRole.MIXER);
+    this.manageMessage();
 
     this.faderUpdate$
       .pipe(
-        auditTime(30)
+        auditTime(50)
       )
       .subscribe(event => {
         this.webSocketService.send({
@@ -140,19 +129,35 @@ export class HomePageComponent implements OnInit, OnDestroy{
     if (index === -1) {
       this.selectedAuxName = 'Main';
       this.webSocketService.disconnect();
-      this.webSocketService.connect(this.token!, TypeSocket.MIXER);
+      this.webSocketService.connect(this.token!, TypeSocket.MIXER, UserRole.MIXER);
+      this.manageMessage();
     } else if (this.auxContainer) {
       const aux = this.auxContainer.auxs[index];
       this.selectedAuxName = aux?.name || 'AUX';
 
       this.webSocketService.disconnect();
-      this.webSocketService.connect(this.token!, TypeSocket.AUX, aux.id);
+      this.webSocketService.connect(this.token!, TypeSocket.AUX, UserRole.MIXER, aux.id);
+      this.manageMessage();
     }
   }
 
-  
   updateFader(event: {fader: Fader, type: TypeRequest}) {
     this.faderUpdate$.next(event);
+  }
+
+  manageMessage(){
+    this.webSocketService.messages().subscribe(msg => {
+      const fader = msg.payload.channel.dca ?
+        this.dcaList.find(f => f.id === msg.payload.channel) :
+        this.faderList.find(f => f.id === msg.payload.channel);
+
+        if(fader){
+          if(msg.payload.value === true || msg.payload.value === false)
+            fader.switch = !msg.payload.value;
+          else
+            fader.value = parseFloat(msg.payload.value);
+        }
+    });
   }
 }
 
