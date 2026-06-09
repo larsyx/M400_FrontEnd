@@ -26,6 +26,7 @@ export class HomeUserComponent {
   channelsSelected: Fader[] = [];
   mainFader!: Fader;
   sceneId: number | null = null;
+  selectedSceneName = '';
   token = localStorage.getItem('access_token');
   auxUser?: IAuxs;
   private faderUpdate$ = new Subject<{ fader: Fader, type: TypeRequest }>();
@@ -40,6 +41,9 @@ export class HomeUserComponent {
   ];
   
   activeTab: string = "all";
+  
+  // Group control step
+  readonly GROUP_CONTROL_STEP = 0.3; // Step in dB
   
   // Main container visibility toggle
   showMainContainer: boolean = false;
@@ -65,6 +69,7 @@ export class HomeUserComponent {
     });
 
     effect(() => {
+      this.selectedSceneName = this.userService.currentSceneName();
       const id = this.userService.currentSceneId();
       if (id !== this.sceneId) {
         this.sceneId = id;
@@ -171,5 +176,35 @@ export class HomeUserComponent {
 
   updateFader(event: {fader: Fader, type: TypeRequest}) {
     this.faderUpdate$.next(event);
+  }
+
+  // Group control methods
+  incrementGroupControl(): void {
+    this.applyGroupControl(this.GROUP_CONTROL_STEP);
+  }
+
+  decrementGroupControl(): void {
+    this.applyGroupControl(-this.GROUP_CONTROL_STEP);
+  }
+
+  private applyGroupControl(offset: number): void {
+    // Apply offset to all visible channels
+    this.channelsSelected.forEach(channel => {
+      const newValue = Math.max(-90, Math.min(10, channel.value + offset));
+      if (newValue !== channel.value) {
+        channel.value = newValue;
+        this.faderUpdate$.next({
+          fader: channel,
+          type: TypeRequest.SLIDER_VALUE
+        });
+      }
+    });
+  }
+
+  // Check if group control should be shown (only for specific tabs)
+  showGroupControl(): boolean {
+    return this.activeTab === TypeChannel.INSTRUMENT ||
+           this.activeTab === TypeChannel.VOICE ||
+           this.activeTab === TypeChannel.DRUM;
   }
 }

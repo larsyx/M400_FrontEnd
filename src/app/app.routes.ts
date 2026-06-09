@@ -24,6 +24,9 @@ const loadProfilePage = () => import('./features/profile/profile')
 const loadUserHomePage = () => import('./features/user/home-user/home-user')
                 .then(m => m.HomeUserComponent);
 
+const loadUserLayoutPage = () => import('./features/user/layout-user/layout-user')
+                .then(m => m.LayoutUserComponent);
+
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
     {
@@ -98,6 +101,10 @@ export const routes: Routes = [
                         providers: [
                             { provide: SCENE_SERVICE, useClass: UserSceneService }
                         ]
+                    },
+                    {
+                        'path' : 'layout',
+                        loadComponent: loadUserLayoutPage
                     }
                 ]
             }

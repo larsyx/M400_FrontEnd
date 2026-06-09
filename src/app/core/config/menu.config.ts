@@ -55,5 +55,11 @@ export const MENU_ITEMS: MenuItem[] = [
         route: '/app/user/home',
         icon: 'sliders',
         roles: [UserRole.USER]
+    },
+    {
+        label: 'Layout',
+        route: '/app/user/layout',
+        icon: 'layout-text-window',
+        roles: [UserRole.USER]
     }
 ];

@@ -1,4 +1,5 @@
 import { Component, DestroyRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Scene } from '../../../shared/scene-card/scene-card';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, NgFor } from '@angular/common';
 import { SlidersContainer } from '../../../shared/sliders/sliders-container/sliders-container/sliders-container';
@@ -42,6 +43,7 @@ export class HomePageComponent implements OnInit, OnDestroy{
   token = localStorage.getItem('access_token');
   private faderUpdate$ = new Subject<{ fader: Fader, type: TypeRequest }>();
   private destroyRef = inject(DestroyRef);
+  selectedSceneName = '';
 
   constructor(
     private mixerService : MixerService,
@@ -113,6 +115,18 @@ export class HomePageComponent implements OnInit, OnDestroy{
       .subscribe({
         next: (res) => {
           this.auxList = res;
+        }
+      });
+
+    this.loadSelectedSceneName();
+  }
+
+  private loadSelectedSceneName(): void {
+    this.mixerService.loadScenes()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (scenes: Scene[]) => {
+          this.selectedSceneName = scenes[0]?.name ?? '';
         }
       });
   }

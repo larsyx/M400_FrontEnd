@@ -35,6 +35,46 @@
   border: 2px solid #dee2e6;
   overflow: visible;
   position: relative;
+  z-index: 20;
+}
+
+.scene-title {
+  font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+  font-weight: 700;
+  color: #1a202c;
+  text-align: center;
+  line-height: 1.2;
+  padding: clamp(0.5rem, 1vw, 0.75rem) clamp(0.75rem, 1.5vw, 1rem);
+  background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.08) 0%, rgba(var(--bs-primary-rgb), 0.03) 100%);
+  border-radius: 0.5rem;
+  border: 2px solid rgba(var(--bs-primary-rgb), 0.2);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(var(--bs-primary-rgb), 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+  }
+  
+  &:hover::before {
+    left: 100%;
+  }
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(var(--bs-primary-rgb), 0.2);
+    border-color: rgba(var(--bs-primary-rgb), 0.4);
+  }
 }
 
 // Top controls row (MAIN and AUX - mobile only)
@@ -44,6 +84,11 @@
   align-items: center;
   gap: clamp(0.5rem, 1.2vw, 0.75rem);
   overflow: visible;
+  
+  .aux-select {
+    flex: 1;
+    min-width: 0;
+  }
   
   @media (min-width: 769px) {
     display: none;
@@ -90,6 +135,8 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
+  touch-action: manipulation;
+  user-select: none;
   
   .tab-icon {
     font-size: clamp(1rem, 2vw, 1.2rem);
@@ -124,6 +171,10 @@
   display: none;
   overflow: visible;
   
+  .aux-select {
+    min-width: clamp(140px, 16vw, 180px);
+  }
+  
   @media (min-width: 769px) {
     display: flex;
     align-items: center;
@@ -148,6 +199,8 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
+  touch-action: manipulation;
+  user-select: none;
   
   .button-text {
     line-height: 1;
@@ -221,6 +274,7 @@
   display: grid;
   grid-template-columns: 1fr auto;
   position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -249,6 +303,58 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    gap: clamp(0.5rem, 1vw, 0.75rem);
+  }
+  
+  // Group control bar - stile coerente con i fader
+  .group-control-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.5rem, 1vw, 0.75rem);
+    padding: clamp(0.5rem, 1vw, 0.75rem);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid #dee2e6;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+  
+  .group-control-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1; // Occupa tutto lo spazio disponibile
+    height: clamp(36px, 4.5vw, 44px);
+    border: 2px solid var(--bs-primary);
+    border-radius: 0.5rem;
+    background: white;
+    color: var(--bs-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    touch-action: manipulation;
+    user-select: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    
+    i {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      font-weight: bold;
+    }
+    
+    &:hover {
+      background: var(--bs-primary);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(var(--bs-primary-rgb), 0.3);
+    }
+    
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(var(--bs-primary-rgb), 0.2);
+    }
   }
   
   // Vertical sliders container - scroll orizzontale
@@ -462,11 +568,36 @@
 
 @media (max-width: 750px) {
   .main-content {
-    grid-template-rows: 1fr;
+    grid-template-rows: auto 1fr;
+    
+    .sliders-wrapper {
+      grid-row: 2;
+      height: 100%;
+      min-height: 0;
+    }
+    
+    app-sliders-container {
+      height: 100%;
+      min-height: 0;
+    }
+    
+    .vertical-sliders-container {
+      height: 100%;
+      min-height: 0;
+    }
   }
-
-  .main-content app-main-container {
-    display: none;
+  
+  .group-control-bar {
+    padding: 0.4rem;
+    gap: 0.4rem;
+  }
+  
+  .group-control-btn {
+    height: 36px;
+    
+    i {
+      font-size: 1.05rem;
+    }
   }
 }
 
@@ -499,6 +630,19 @@
     flex: 1;
     min-width: 0;
     width: 100%;
+  }
+  
+  .group-control-bar {
+    padding: 0.35rem;
+    gap: 0.35rem;
+  }
+  
+  .group-control-btn {
+    height: 34px;
+    
+    i {
+      font-size: 1rem;
+    }
   }
 }
 
@@ -543,6 +687,19 @@
   .main-content {
     padding: 0.3rem;
   }
+  
+  .group-control-bar {
+    padding: 0.3rem;
+    gap: 0.3rem;
+  }
+  
+  .group-control-btn {
+    height: 32px;
+    
+    i {
+      font-size: 0.95rem;
+    }
+  }
 }
 
 // ===== DARK THEME SUPPORT =====
@@ -555,6 +712,22 @@
     background: rgba(45, 55, 72, 0.95);
     border-color: #4a5568;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .scene-title {
+    color: #f7fafc;
+    background: linear-gradient(135deg, rgba(99, 179, 237, 0.15) 0%, rgba(99, 179, 237, 0.05) 100%);
+    border-color: rgba(99, 179, 237, 0.3);
+    box-shadow: 0 2px 8px rgba(99, 179, 237, 0.2);
+    
+    &::before {
+      background: linear-gradient(90deg, transparent, rgba(99, 179, 237, 0.2), transparent);
+    }
+    
+    &:hover {
+      box-shadow: 0 4px 12px rgba(99, 179, 237, 0.3);
+      border-color: rgba(99, 179, 237, 0.5);
+    }
   }
   
   .tab-button {
@@ -634,6 +807,31 @@
         border-bottom-color: #4a5568;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       }
+    }
+  }
+  
+  // Group control bar dark theme - coerente con i fader
+  .group-control-bar {
+    background: rgba(45, 55, 72, 0.95);
+    backdrop-filter: blur(10px);
+    border-color: #4a5568;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .group-control-btn {
+    background: #2d3748;
+    border-color: #63b3ed;
+    color: #63b3ed;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    
+    &:hover {
+      background: #63b3ed;
+      color: #1a202c;
+      box-shadow: 0 4px 16px rgba(99, 179, 237, 0.4);
+    }
+    
+    &:active {
+      box-shadow: 0 2px 8px rgba(99, 179, 237, 0.3);
     }
   }
 }

@@ -50,7 +50,7 @@ export class ScenesComponent implements OnInit {
     const isUserMode = currentPath.includes('/user/');
     
     if (isUserMode) {
-      this.userService.setCurrentSceneId(scene.id);
+      this.userService.setCurrentScene(scene.id, scene.name);
       this.router.navigate(['/app/user/home']).then(
         success => console.log('Navigazione riuscita:', success),
         error => console.error('Errore navigazione:', error)

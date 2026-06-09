@@ -7,6 +7,7 @@ import { Fader } from "../models/fader.model";
 import { SHOW_LOADER } from "../interceptors/loader.interceptor";
 
 const SCENE_ID_STORAGE_KEY = "user.currentSceneId";
+const SCENE_NAME_STORAGE_KEY = "user.currentSceneName";
 
 @Injectable({
     providedIn: "root"
@@ -17,19 +18,33 @@ export class UserService{
 
     private _currentSceneId = signal<number | null>(this.readStoredSceneId());
     readonly currentSceneId = this._currentSceneId.asReadonly();
+    private _currentSceneName = signal<string>(this.readStoredSceneName());
+    readonly currentSceneName = this._currentSceneName.asReadonly();
 
     constructor(private http: HttpClient) {}
 
-    setCurrentSceneId(sceneId: number | null): void {
+    setCurrentScene(sceneId: number | null, sceneName: string | null): void {
         this._currentSceneId.set(sceneId);
+        this._currentSceneName.set(sceneName ?? '');
+
         try {
             if (sceneId === null) {
                 localStorage.removeItem(SCENE_ID_STORAGE_KEY);
             } else {
                 localStorage.setItem(SCENE_ID_STORAGE_KEY, String(sceneId));
             }
+
+            if (!sceneName) {
+                localStorage.removeItem(SCENE_NAME_STORAGE_KEY);
+            } else {
+                localStorage.setItem(SCENE_NAME_STORAGE_KEY, sceneName);
+            }
         } catch {
         }
+    }
+
+    setCurrentSceneId(sceneId: number | null): void {
+        this.setCurrentScene(sceneId, sceneId === null ? null : this._currentSceneName());
     }
 
     private readStoredSceneId(): number | null {
@@ -40,6 +55,14 @@ export class UserService{
             return Number.isFinite(n) ? n : null;
         } catch {
             return null;
+        }
+    }
+
+    private readStoredSceneName(): string {
+        try {
+            return localStorage.getItem(SCENE_NAME_STORAGE_KEY) ?? '';
+        } catch {
+            return '';
         }
     }
 

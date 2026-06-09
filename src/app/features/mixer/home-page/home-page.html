@@ -1,5 +1,9 @@
 <div class="home-page">
 
+  @if (selectedSceneName) {
+    <div class="scene-title">{{ selectedSceneName }}</div>
+  }
+
   <div class="bottom-menu">
     <div class="button-group left-group">
       <button class="btn btn-outline-primary" [class.active]="activeView === HomeViewButtons.EQ" (click)="setView(HomeViewButtons.EQ)">

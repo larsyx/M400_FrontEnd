@@ -118,6 +118,8 @@
   justify-content: center;
   transition: vars.$transition-base;
   padding: 0;
+  touch-action: manipulation;
+  user-select: none;
   
   svg {
     width: 18px;
@@ -229,6 +231,8 @@
   justify-content: center;
   transition: vars.$transition-base;
   padding: 0;
+  touch-action: manipulation;
+  user-select: none;
   
   svg {
     width: 18px;

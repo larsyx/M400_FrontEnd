@@ -3,6 +3,7 @@ import { environment } from "../../../environments/environment.development";
 import { HttpClient, HttpContext } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { Fader } from "../models/fader.model";
+import { Scene } from "../../shared/scene-card/scene-card";
 import { IAuxs } from "../models/auxs.model";
 import { IMixerHome } from "../models/mixer.home.model";
 import { SHOW_LOADER } from "../interceptors/loader.interceptor";
@@ -45,5 +46,10 @@ export class MixerService{
   loadValues(auxId: number){
     const url = this.API_URL + `/aux/${auxId}`;
     return this.http.get<Fader[]>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
+  }
+
+  loadScenes(): Observable<Scene[]>{
+    const url = this.API_URL + "/scene";
+    return this.http.get<Scene[]>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
   }
 }

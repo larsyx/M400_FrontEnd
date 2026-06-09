@@ -2,6 +2,9 @@
   <div class="user-home-page">
     <!-- Header with tabs and controls -->
     <div class="header-controls">
+      @if (selectedSceneName) {
+        <div class="scene-title">{{ selectedSceneName }}</div>
+      }
       <!-- Top row: MAIN and AUX controls (mobile only) -->
       <div class="top-controls">
         <!-- Toggle Main Container button -->
@@ -10,6 +13,7 @@
           class="control-button toggle-main icon-only"
           [class.active]="showMainContainer"
           (click)="toggleMainContainer()"
+          (dblclick)="$event.preventDefault()"
           title="Toggle Main Container"
           aria-label="Toggle Main Container">
           <i class="bi bi-sliders"></i>
@@ -34,7 +38,8 @@
             <button
               class="tab-button"
               [class.active]="activeTab === tab.id"
-              (click)="selectTab(tab.id)">
+              (click)="selectTab(tab.id)"
+              (dblclick)="$event.preventDefault()">
               <span class="tab-icon">{{ tab.icon }}</span>
               <span class="tab-label">{{ tab.label }}</span>
             </button>
@@ -49,6 +54,7 @@
             class="control-button toggle-main icon-only"
             [class.active]="showMainContainer"
             (click)="toggleMainContainer()"
+            (dblclick)="$event.preventDefault()"
             title="Toggle Main Container"
             aria-label="Toggle Main Container">
             <i class="bi bi-sliders"></i>
@@ -70,8 +76,31 @@
     <!-- Main content area with sliders and optional main container -->
     <div class="main-content" [class.horizontal-layout]="sliderOrientation() === 'horizontal'">
       <div class="sliders-wrapper">
+        <!-- Group control bar (only for specific tabs) -->
+        @if (showGroupControl()) {
+          <div class="group-control-bar">
+            <button
+              class="group-control-btn decrement"
+              (click)="decrementGroupControl()"
+              (dblclick)="$event.preventDefault()"
+              title="Diminuisci tutti i canali di 1 dB"
+              aria-label="Diminuisci gruppo">
+              <i class="bi bi-dash-lg"></i>
+            </button>
+            
+            <button
+              class="group-control-btn increment"
+              (click)="incrementGroupControl()"
+              (dblclick)="$event.preventDefault()"
+              title="Aumenta tutti i canali di 1 dB"
+              aria-label="Aumenta gruppo">
+              <i class="bi bi-plus-lg"></i>
+            </button>
+          </div>
+        }
+        
         <app-sliders-container
-          [channels]="channelsSelected" 
+          [channels]="channelsSelected"
           (faderChange)="updateFader($event)">
         </app-sliders-container>
       </div>
