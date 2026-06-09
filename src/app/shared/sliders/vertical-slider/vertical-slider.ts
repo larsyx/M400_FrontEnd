@@ -30,6 +30,14 @@ export class VerticalSlider implements OnDestroy, AfterViewInit {
   private autoRepeatInterval: any = null;
   private autoRepeatTimeout: any = null;
   
+  // Touch gesture detection
+  private touchStartX: number = 0;
+  private touchStartY: number = 0;
+  private touchMoved: boolean = false;
+  private isVerticalDrag: boolean = false;
+  private dragStartedOnContainer: boolean = false;
+  private lastClientY: number = 0;
+  
   // Modalità compatta (knob invece di fader)
   useCompactMode: boolean = false;
   hideSublabel: boolean = false; // Nasconde sublabel sotto i 400px
@@ -186,13 +194,46 @@ export class VerticalSlider implements OnDestroy, AfterViewInit {
     event.preventDefault();
     event.stopPropagation();
     this.isDragging = true;
+    this.dragStartedOnContainer = false;
     this.trackElement = (event.target as HTMLElement).parentElement;
   }
   
   onThumbTouchStart(event: TouchEvent): void {
     event.preventDefault();
+    event.stopPropagation();
     this.isDragging = true;
+    this.dragStartedOnContainer = false;
     this.trackElement = (event.target as HTMLElement).parentElement;
+  }
+  
+  onTrackMouseDown(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+    this.dragStartedOnContainer = false;
+    this.trackElement = event.currentTarget as HTMLElement;
+    this.updateValueFromPosition(event.clientY, this.trackElement);
+  }
+  
+  onTrackTouchStart(event: TouchEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+    this.dragStartedOnContainer = false;
+    this.trackElement = event.currentTarget as HTMLElement;
+    const touch = event.touches[0];
+    this.updateValueFromPosition(touch.clientY, this.trackElement);
+  }
+  
+  onContainerTouchStart(event: TouchEvent): void {
+    // Non chiamare preventDefault qui per permettere la detection della direzione
+    const touch = event.touches[0];
+    this.touchStartX = touch.clientX;
+    this.touchStartY = touch.clientY;
+    this.touchMoved = false;
+    this.isVerticalDrag = false;
+    this.dragStartedOnContainer = true;
+    this.lastClientY = touch.clientY;
   }
   
   @HostListener('document:mousemove', ['$event'])
@@ -211,16 +252,54 @@ export class VerticalSlider implements OnDestroy, AfterViewInit {
   
   @HostListener('document:touchmove', ['$event'])
   onTouchMove(event: TouchEvent): void {
-    if (this.isDragging && this.trackElement && event.touches.length === 1) {
-      event.preventDefault();
-      this.updateValueFromPosition(event.touches[0].clientY, this.trackElement);
+    if (event.touches.length === 1) {
+      const touch = event.touches[0];
+      
+      // Se il drag è già iniziato su traccia/thumb, continua normalmente
+      if (this.isDragging && this.trackElement) {
+        event.preventDefault();
+        this.updateValueFromPosition(touch.clientY, this.trackElement);
+        return;
+      }
+      
+      // Altrimenti gestisci il drag sul container con detection della direzione
+      if (this.dragStartedOnContainer && !this.touchMoved) {
+        const deltaX = Math.abs(touch.clientX - this.touchStartX);
+        const deltaY = Math.abs(touch.clientY - this.touchStartY);
+        
+        // Soglia minima di movimento per determinare la direzione (5px)
+        if (deltaX > 5 || deltaY > 5) {
+          this.touchMoved = true;
+          
+          // Se il movimento verticale è maggiore di quello orizzontale, è un drag verticale
+          if (deltaY > deltaX) {
+            this.isVerticalDrag = true;
+            event.preventDefault(); // Previeni lo scroll solo se è un drag verticale
+          } else {
+            // Movimento orizzontale - permetti lo scroll della pagina
+            this.dragStartedOnContainer = false;
+            return;
+          }
+        } else {
+          return;
+        }
+      }
+      
+      if (this.dragStartedOnContainer && this.isVerticalDrag) {
+        event.preventDefault();
+        this.updateValueFromRelativeMovement(touch.clientY);
+      }
     }
   }
   
   @HostListener('document:touchend')
+  @HostListener('document:touchcancel')
   onTouchEnd(): void {
     this.isDragging = false;
     this.trackElement = null;
+    this.touchMoved = false;
+    this.isVerticalDrag = false;
+    this.dragStartedOnContainer = false;
   }
   
   @HostListener('wheel', ['$event'])
@@ -244,6 +323,22 @@ export class VerticalSlider implements OnDestroy, AfterViewInit {
     const sliderPercent = (1 - (y / rect.height)) * 100; // 0-100%
     const dbValue = this.percentageToDb(sliderPercent);
     this.updateValue(dbValue);
+  }
+  
+  private updateValueFromRelativeMovement(clientY: number): void {
+    // Calcola il delta in pixel rispetto all'ultima posizione
+    const deltaY = this.lastClientY - clientY; // Invertito perché Y cresce verso il basso
+    this.lastClientY = clientY;
+    
+    // Sensibilità molto ridotta per movimento più lineare e controllabile
+    // Aumentato il divisore da 3 a 5 per rendere il movimento più fluido
+    const sensitivity = 5;
+    const pixelToValueRatio = (this.max - this.min) / (300 * sensitivity);
+    const deltaValue = deltaY * pixelToValueRatio;
+    
+    // Aggiorna il valore relativamente
+    const newValue = this.value + deltaValue;
+    this.updateValue(newValue);
   }
   
   updateValue(newValue: number): void {

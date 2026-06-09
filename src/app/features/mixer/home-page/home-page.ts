@@ -1,4 +1,5 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, DestroyRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, NgFor } from '@angular/common';
 import { SlidersContainer } from '../../../shared/sliders/sliders-container/sliders-container/sliders-container';
 import { AuxContainer } from '../../../shared/aux-container/aux-container/aux-container';
@@ -40,6 +41,7 @@ export class HomePageComponent implements OnInit, OnDestroy{
   auxList: IAuxs[] = [];
   token = localStorage.getItem('access_token');
   private faderUpdate$ = new Subject<{ fader: Fader, type: TypeRequest }>();
+  private destroyRef = inject(DestroyRef);
 
   constructor(
     private mixerService : MixerService,
@@ -48,32 +50,34 @@ export class HomePageComponent implements OnInit, OnDestroy{
   
 
   ngOnInit(): void {
-    this.mixerService.laodHome().subscribe({
-      next: (res) => {  
-        this.dcaList = res.dca;
-        this.auxList = res.aux;
 
-        this.mainFader = res.fader.find(f => f.id === 0) ?? {
-          id: 0,
-          name: '',
-          description: '',
-          value: 0,
-          switch: false,
-          link: false,
-          type: null
-        };
+    this.mixerService.loadFader()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
 
-        res.fader.forEach(f => f.switch = !f.switch)
-        this.faderList = res.fader.filter(f => f.id !== 0); 
-      }
-    });
+          this.mainFader = res.find(f => f.id === 0) ?? {
+            id: 0,
+            name: '',
+            description: '',
+            value: 0,
+            switch: false,
+            link: false,
+            type: null
+          };
 
-    this.webSocketService.connect(this.token!, TypeSocket.MIXER, UserRole.MIXER);
+          res.forEach(f => f.switch = !f.switch)
+          this.faderList = res.filter(f => f.id !== 0);
+        }
+      });
+
+    this.webSocketService.connect(this.token!, TypeSocket.MIXER, UserRole.MIXER, undefined, false);
     this.manageMessage();
 
     this.faderUpdate$
       .pipe(
-        auditTime(50)
+        auditTime(50),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(event => {
         this.webSocketService.send({
@@ -85,6 +89,31 @@ export class HomePageComponent implements OnInit, OnDestroy{
             switch: !event.fader.switch
           }
         });
+      });
+
+    this.mixerService.loadFaderNames()
+     .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.faderList.forEach(f => f.description = res.find(a => a.id === f.id)?.description ?? f.description);
+        }
+      });
+
+
+    this.mixerService.loadDca()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.dcaList = res;
+        }
+      });
+
+    this.mixerService.loadAux()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.auxList = res;
+        }
       });
   }
 

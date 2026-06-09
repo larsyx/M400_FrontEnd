@@ -1,4 +1,9 @@
-<div class="vertical-slider" [class.muted]="muted" [class.compact-mode]="useCompactMode" [class.selected]="isSelected" [style.width.px]="currentWidth">
+<div class="vertical-slider"
+     [class.muted]="muted"
+     [class.compact-mode]="useCompactMode"
+     [class.selected]="isSelected"
+     [style.width.px]="currentWidth"
+     (touchstart)="onContainerTouchStart($event)">
   
   @if (useCompactMode) {
     <div class="compact-container">

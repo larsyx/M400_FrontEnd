@@ -1,9 +1,10 @@
 import { Injectable, signal } from "@angular/core";
 import { environment } from "../../../environments/environment.development";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpContext } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { IUserHome } from "../models/user.home.model";
 import { Fader } from "../models/fader.model";
+import { SHOW_LOADER } from "../interceptors/loader.interceptor";
 
 const SCENE_ID_STORAGE_KEY = "user.currentSceneId";
 
@@ -44,21 +45,22 @@ export class UserService{
 
     loadHomeScene(id: number): Observable<IUserHome>{
         const url = this.API_URL + this.SCENE_PATH + `/${id}`;
-        return this.http.get<IUserHome>(url)
+        return this.http.get<IUserHome>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
     }
 
     loadHome(sceneId: number): Observable<IUserHome>{
         const url = this.API_URL + this.SCENE_PATH + `/${sceneId}`;
-        return this.http.get<IUserHome>(url)
+        return this.http.get<IUserHome>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
+
     }
 
     loadFader(aux_id : number): Observable<Fader[]>{
         const url = this.API_URL + `/${aux_id}`;
-        return this.http.get<Fader[]>(url);
+        return this.http.get<Fader[]>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
     }
 
     loadFaderScene(aux_id : number, scene_id : number): Observable<Fader[]>{
         const url = this.API_URL + this.SCENE_PATH + `/${scene_id}/${aux_id}`;
-        return this.http.get<Fader[]>(url)
+        return this.http.get<Fader[]>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
     }
 }

@@ -1,5 +1,6 @@
-import { Component, Input, Output, EventEmitter, HostListener, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { SliderSettingsService } from '../../../core/services/slider-settings.service';
 
 @Component({
   selector: 'app-horizontal-slider',
@@ -27,7 +28,27 @@ export class HorizontalSlider implements OnDestroy {
   private autoRepeatInterval: any = null;
   private autoRepeatTimeout: any = null;
   
-  constructor(private cdr: ChangeDetectorRef) {}
+  // Touch gesture detection
+  private touchStartX: number = 0;
+  private touchStartY: number = 0;
+  private touchMoved: boolean = false;
+  private isHorizontalDrag: boolean = false;
+  private dragStartedOnContainer: boolean = false;
+  private lastClientX: number = 0;
+  
+  // Dynamic height from settings (same value as width for vertical sliders)
+  currentHeight: number = 60;
+  
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private sliderSettings: SliderSettingsService
+  ) {
+    // React to width changes (applied as height for horizontal sliders)
+    effect(() => {
+      this.currentHeight = this.sliderSettings.sliderWidth();
+      this.cdr.markForCheck();
+    });
+  }
   
   /**
    * Converte il valore in dB alla percentuale dello slider (0-100%)
@@ -111,13 +132,46 @@ export class HorizontalSlider implements OnDestroy {
     event.preventDefault();
     event.stopPropagation();
     this.isDragging = true;
+    this.dragStartedOnContainer = false;
     this.trackElement = (event.target as HTMLElement).parentElement;
   }
   
   onThumbTouchStart(event: TouchEvent): void {
     event.preventDefault();
+    event.stopPropagation();
     this.isDragging = true;
+    this.dragStartedOnContainer = false;
     this.trackElement = (event.target as HTMLElement).parentElement;
+  }
+  
+  onTrackMouseDown(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+    this.dragStartedOnContainer = false;
+    this.trackElement = event.currentTarget as HTMLElement;
+    this.updateValueFromPosition(event.clientX, this.trackElement);
+  }
+  
+  onTrackTouchStart(event: TouchEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+    this.dragStartedOnContainer = false;
+    this.trackElement = event.currentTarget as HTMLElement;
+    const touch = event.touches[0];
+    this.updateValueFromPosition(touch.clientX, this.trackElement);
+  }
+  
+  onContainerTouchStart(event: TouchEvent): void {
+    // Non chiamare preventDefault qui per permettere la detection della direzione
+    const touch = event.touches[0];
+    this.touchStartX = touch.clientX;
+    this.touchStartY = touch.clientY;
+    this.touchMoved = false;
+    this.isHorizontalDrag = false;
+    this.dragStartedOnContainer = true;
+    this.lastClientX = touch.clientX;
   }
   
   @HostListener('document:mousemove', ['$event'])
@@ -136,16 +190,54 @@ export class HorizontalSlider implements OnDestroy {
   
   @HostListener('document:touchmove', ['$event'])
   onTouchMove(event: TouchEvent): void {
-    if (this.isDragging && this.trackElement && event.touches.length === 1) {
-      event.preventDefault();
-      this.updateValueFromPosition(event.touches[0].clientX, this.trackElement);
+    if (event.touches.length === 1) {
+      const touch = event.touches[0];
+      
+      // Se il drag è già iniziato su traccia/thumb, continua normalmente
+      if (this.isDragging && this.trackElement) {
+        event.preventDefault();
+        this.updateValueFromPosition(touch.clientX, this.trackElement);
+        return;
+      }
+      
+      // Altrimenti gestisci il drag sul container con detection della direzione
+      if (this.dragStartedOnContainer && !this.touchMoved) {
+        const deltaX = Math.abs(touch.clientX - this.touchStartX);
+        const deltaY = Math.abs(touch.clientY - this.touchStartY);
+        
+        // Soglia minima di movimento per determinare la direzione (5px)
+        if (deltaX > 5 || deltaY > 5) {
+          this.touchMoved = true;
+          
+          // Se il movimento orizzontale è maggiore di quello verticale, è un drag orizzontale
+          if (deltaX > deltaY) {
+            this.isHorizontalDrag = true;
+            event.preventDefault(); // Previeni lo scroll solo se è un drag orizzontale
+          } else {
+            // Movimento verticale - permetti lo scroll della pagina
+            this.dragStartedOnContainer = false;
+            return;
+          }
+        } else {
+          return;
+        }
+      }
+      
+      if (this.dragStartedOnContainer && this.isHorizontalDrag) {
+        event.preventDefault();
+        this.updateValueFromRelativeMovement(touch.clientX);
+      }
     }
   }
   
   @HostListener('document:touchend')
+  @HostListener('document:touchcancel')
   onTouchEnd(): void {
     this.isDragging = false;
     this.trackElement = null;
+    this.touchMoved = false;
+    this.isHorizontalDrag = false;
+    this.dragStartedOnContainer = false;
   }
   
   @HostListener('wheel', ['$event'])
@@ -166,6 +258,22 @@ export class HorizontalSlider implements OnDestroy {
     const dbValue = this.percentageToDb(sliderPercent);
     this.updateValue(dbValue);
   }
+  private updateValueFromRelativeMovement(clientX: number): void {
+    // Calcola il delta in pixel rispetto all'ultima posizione
+    const deltaX = clientX - this.lastClientX;
+    this.lastClientX = clientX;
+    
+    // Sensibilità molto ridotta per movimento più lineare e controllabile
+    // Aumentato il divisore da 3 a 5 per rendere il movimento più fluido
+    const sensitivity = 5;
+    const pixelToValueRatio = (this.max - this.min) / (300 * sensitivity);
+    const deltaValue = deltaX * pixelToValueRatio;
+    
+    // Aggiorna il valore relativamente
+    const newValue = this.value + deltaValue;
+    this.updateValue(newValue);
+  }
+  
   
   updateValue(newValue: number): void {
     newValue = Math.max(this.min, Math.min(this.max, newValue));

@@ -34,11 +34,13 @@ export class WebSocketService {
   private loader = inject(LoaderService);
   private connectingShown = false;
 
-    connect(token: string, type: TypeSocket, role : UserRole, aux_id?: number) {
+    connect(token: string, type: TypeSocket, role : UserRole, aux_id?: number, showLoader: boolean = false) {
     this.socket = new WebSocket(this.WS_URL + type);
 
-    this.loader.show();
-    this.connectingShown = true;
+    if (showLoader) {
+      this.loader.show();
+      this.connectingShown = true;
+    }
 
     this.socket.onopen = () => {
       console.log('✅ WebSocket connessa');

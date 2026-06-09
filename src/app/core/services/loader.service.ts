@@ -16,4 +16,8 @@ export class LoaderService {
   hide() {
     this._pending.next(Math.max(0, this._pending.value - 1));
   }
+
+  reset() {
+    this._pending.next(0);
+  }
 }

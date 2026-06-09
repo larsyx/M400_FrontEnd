@@ -192,6 +192,19 @@
   will-change: bottom, transform;
   transition: transform 0.15s ease;
   
+  // Area cliccabile più grande (invisibile)
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 48px;  // Area cliccabile più grande
+    height: 48px; // Area cliccabile più grande
+    border-radius: vars.$border-radius-sm;
+    // background: rgba(255, 0, 0, 0.1); // Decommentare per debug
+  }
+  
   &:hover {
     transform: translateX(-50%) scale(1.15) translateZ(0);
   }

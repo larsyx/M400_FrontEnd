@@ -1,4 +1,7 @@
-<div class="horizontal-slider" [class.muted]="muted">
+<div class="horizontal-slider"
+     [class.muted]="muted"
+     [style.height.px]="currentHeight"
+     (touchstart)="onContainerTouchStart($event)">
   
   <!-- Header: Nome, Label e dB in orizzontale -->
   <div class="slider-header">
