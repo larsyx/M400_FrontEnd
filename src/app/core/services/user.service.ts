@@ -6,6 +6,7 @@ import { IUserHome } from "../models/user.home.model";
 import { Fader } from "../models/fader.model";
 import { SHOW_LOADER } from "../interceptors/loader.interceptor";
 import { ChannelLayout } from "../models/channel.layout.model";
+import { IProfile } from "../models/profile.model";
 
 const SCENE_ID_STORAGE_KEY = "user.currentSceneId";
 const SCENE_NAME_STORAGE_KEY = "user.currentSceneName";
@@ -101,6 +102,33 @@ export class UserService{
     //TODO: remove /user from api url
     loadValues(auxId: number){
         const url = this.API_URL + `/aux/${auxId}`;
+        return this.http.get<Fader[]>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
+    }
+
+    // profiles
+    createProfile(sceneId: number, profile: IProfile, faders: Fader[]): Observable<IProfile> {
+        const url = `${this.API_URL}${this.SCENE_PATH}/${sceneId}/profile`;
+        return this.http.post<IProfile>(url, {profile, faders}, { context: new HttpContext().set(SHOW_LOADER, true)});
+    }
+
+    updateProfile(sceneId: number, profile: IProfile, faders: Fader[]): Observable<void> {
+        const url = `${this.API_URL}${this.SCENE_PATH}/${sceneId}/profile`;
+        return this.http.put<void>(url, {profile, faders}, { context: new HttpContext().set(SHOW_LOADER, true)});
+    }
+
+    deleteProfile(sceneId: number, profile_id: number): Observable<void> {
+        const url = `${this.API_URL}${this.SCENE_PATH}/${sceneId}/profile/${profile_id}`;
+        return this.http.delete<void>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
+    }
+
+    deleteAllProfiles(sceneId: number): Observable<void> {
+        const url = `${this.API_URL}${this.SCENE_PATH}/${sceneId}/profile`;
+        return this.http.delete<void>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
+    }
+
+    loadProfile(sceneId: number, profile_id: number, aux_id: number): Observable<Fader[]> {
+        const url = `${this.API_URL}${this.SCENE_PATH}/${sceneId}/profile/${profile_id}/${aux_id}`;
+        
         return this.http.get<Fader[]>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
     }
 }

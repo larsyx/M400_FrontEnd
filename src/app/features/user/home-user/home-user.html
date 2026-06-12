@@ -28,8 +28,18 @@
           [placeholder]="'Select AUX'"
           (valueChange)="onAuxChange($event)">
         </app-custom-select>
+
+        <!-- Profile selector -->
+        <app-custom-select
+          class="profile-select"
+          [options]="profileOptions"
+          [value]="selectedProfile"
+          [ariaLabel]="'Seleziona profilo'"
+          [placeholder]="'Seleziona profilo'"
+          (valueChange)="onProfileChange($event)">
+        </app-custom-select>
       </div>
-      
+
       <!-- Main row: Tabs and controls -->
       <div class="main-row">
         <!-- Tabs for filtering -->
@@ -68,6 +78,16 @@
             [ariaLabel]="'Select AUX output'"
             [placeholder]="'Select AUX'"
             (valueChange)="onAuxChange($event)">
+          </app-custom-select>
+
+          <!-- Profile selector -->
+          <app-custom-select
+            class="profile-select"
+            [options]="profileOptions"
+            [value]="selectedProfile"
+            [ariaLabel]="'Seleziona profilo'"
+            [placeholder]="'Seleziona profilo'"
+            (valueChange)="onProfileChange($event)">
           </app-custom-select>
         </div>
       </div>
@@ -116,6 +136,217 @@
     <div class="empty-state">
       <i class="bi bi-sliders"></i>
       <p>Nessuna scena selezionata</p>
+    </div>
+  </div>
+}
+
+<!-- Profile management modal -->
+@if (showProfileModal) {
+  <div class="profile-modal-overlay" (click)="closeProfileModal()">
+    <div class="profile-modal-content" (click)="$event.stopPropagation()">
+      <div class="profile-modal-header">
+        <h3 class="profile-modal-title">Gestione profili</h3>
+        <button
+          type="button"
+          class="profile-modal-close"
+          (click)="closeProfileModal()"
+          aria-label="Chiudi">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="profile-modal-body">
+        <!-- Add new profile -->
+        <form class="profile-add-form" (ngSubmit)="addProfile()">
+          <label class="profile-modal-label" for="profile-name-input">Nome profilo</label>
+          <div class="profile-add-row">
+            <input
+              id="profile-name-input"
+              type="text"
+              class="profile-modal-input"
+              [(ngModel)]="newProfileName"
+              name="profileName"
+              placeholder="Inserisci un nome"
+              autocomplete="off" />
+            <button
+              type="submit"
+              class="profile-modal-btn profile-modal-btn-primary profile-add-btn"
+              [disabled]="!newProfileName.trim()">
+              <i class="bi bi-plus-lg"></i>
+              <span>Aggiungi</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Existing profiles list -->
+        <div class="profile-list-section">
+          <div class="profile-list-header">
+            <span class="profile-modal-label">Profili esistenti</span>
+            <span class="profile-list-count">{{ profiles.length }}</span>
+          </div>
+
+          @if (profiles.length === 0) {
+            <div class="profile-list-empty">
+              <i class="bi bi-inbox"></i>
+              <span>Nessun profilo creato</span>
+            </div>
+          } @else {
+            <ul class="profile-list">
+              @for (profile of sortedProfiles; track profile.id) {
+                <li class="profile-list-item"
+                    [class.editing]="editingProfileId === profile.id"
+                    [class.confirming]="confirmDeleteId === profile.id"
+                    [class.updating]="confirmUpdateId === profile.id">
+
+                  @if (editingProfileId === profile.id) {
+                    <input
+                      type="text"
+                      class="profile-modal-input profile-list-input"
+                      [(ngModel)]="editingProfileName"
+                      (keydown.enter)="saveEditProfile()"
+                      (keydown.escape)="cancelEditProfile()"
+                      autocomplete="off"
+                      autofocus />
+                    <div class="profile-list-actions">
+                      <button
+                        type="button"
+                        class="profile-icon-btn profile-icon-btn-success"
+                        (click)="saveEditProfile()"
+                        [disabled]="!editingProfileName.trim()"
+                        title="Salva"
+                        aria-label="Salva">
+                        <i class="bi bi-check-lg"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="profile-icon-btn"
+                        (click)="cancelEditProfile()"
+                        title="Annulla"
+                        aria-label="Annulla">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                  } @else if (confirmDeleteId === profile.id) {
+                    <span class="profile-list-confirm-text">
+                      Eliminare "{{ profile.name }}"?
+                    </span>
+                    <div class="profile-list-actions">
+                      <button
+                        type="button"
+                        class="profile-icon-btn profile-icon-btn-danger"
+                        (click)="confirmDeleteProfile(profile.id)"
+                        title="Conferma"
+                        aria-label="Conferma eliminazione">
+                        <i class="bi bi-check-lg"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="profile-icon-btn"
+                        (click)="cancelDeleteProfile()"
+                        title="Annulla"
+                        aria-label="Annulla">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                  } @else if (confirmUpdateId === profile.id) {
+                    <span class="profile-list-update-text">
+                      Aggiornare "{{ profile.name }}" con i valori attuali?
+                    </span>
+                    <div class="profile-list-actions">
+                      <button
+                        type="button"
+                        class="profile-icon-btn profile-icon-btn-success"
+                        (click)="confirmUpdateProfile(profile.id)"
+                        title="Conferma"
+                        aria-label="Conferma aggiornamento">
+                        <i class="bi bi-check-lg"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="profile-icon-btn"
+                        (click)="cancelUpdateProfile()"
+                        title="Annulla"
+                        aria-label="Annulla">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                  } @else {
+                    <span class="profile-list-name">
+                      {{ profile.name }}
+                      @if (profile.name) {
+                        <i class="bi bi-bookmark-check-fill profile-list-flag"
+                           title="Profilo con dati salvati"></i>
+                      }
+                    </span>
+                    <div class="profile-list-actions">
+                      <button
+                        type="button"
+                        class="profile-icon-btn"
+                        (click)="startEditProfile(profile)"
+                        title="Rinomina"
+                        aria-label="Rinomina profilo">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="profile-icon-btn profile-icon-btn-info"
+                        (click)="requestUpdateProfile(profile.id)"
+                        title="Aggiorna con stato attuale"
+                        aria-label="Aggiorna profilo con stato attuale">
+                        <i class="bi bi-floppy"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="profile-icon-btn profile-icon-btn-danger"
+                        (click)="requestDeleteProfile(profile.id)"
+                        title="Elimina"
+                        aria-label="Elimina profilo">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </div>
+
+      <div class="profile-modal-footer">
+        @if (confirmDeleteAll) {
+          <span class="profile-footer-confirm-text">Eliminare tutti i profili?</span>
+          <div class="profile-footer-actions">
+            <button
+              type="button"
+              class="profile-modal-btn profile-modal-btn-secondary"
+              (click)="cancelDeleteAllProfiles()">
+              Annulla
+            </button>
+            <button
+              type="button"
+              class="profile-modal-btn profile-modal-btn-danger"
+              (click)="confirmDeleteAllProfiles()">
+              <i class="bi bi-trash"></i>
+              <span>Conferma</span>
+            </button>
+          </div>
+        } @else {
+          <button
+            type="button"
+            class="profile-modal-btn profile-modal-btn-danger-outline"
+            (click)="requestDeleteAllProfiles()"
+            [disabled]="profiles.length === 0">
+            <i class="bi bi-trash"></i>
+            <span>Elimina tutti</span>
+          </button>
+          <button
+            type="button"
+            class="profile-modal-btn profile-modal-btn-secondary"
+            (click)="closeProfileModal()">
+            Chiudi
+          </button>
+        }
+      </div>
     </div>
   </div>
 }
