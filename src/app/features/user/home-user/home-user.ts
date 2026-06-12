@@ -43,21 +43,14 @@ export class HomeUserComponent {
   activeTab: string = "all";
   
   // Group control step
-  readonly GROUP_CONTROL_STEP = 0.3; // Step in dB
+  readonly GROUP_CONTROL_STEP = 0.2; // Step in dB
   
   // Main container visibility toggle
   showMainContainer: boolean = false;
   
   // AUX selection
-  auxOptions: CustomSelectOption[] = [
-    { value: 'main', label: 'Main' },
-    { value: 'aux1', label: 'AUX 1' },
-    { value: 'aux2', label: 'AUX 2' },
-    { value: 'aux3', label: 'AUX 3' },
-    { value: 'aux4', label: 'AUX 4' }
-  ];
-  
-  selectedAux: string = 'main';
+  auxOptions: CustomSelectOption[] = [];
+  selectedAux: number | null = null;
   
   constructor(
     private sliderSettings: SliderSettingsService,
@@ -84,8 +77,10 @@ export class HomeUserComponent {
     this.sliderOrientation.set(this.sliderSettings.getOrientation());
 
     this.userService.loadHome(this.sceneId!).subscribe({
-      next: (res) => {  
-        //this.auxList = res.aux;
+      next: (res) => {
+        for(let aux of res.aux){
+          this.auxOptions.push({value: aux.id, label: aux.name})
+        }
 
         this.mainFader = res.fader.find(f => f.id === 0) ?? {
           id: 0,
@@ -102,6 +97,7 @@ export class HomeUserComponent {
         this.channelsSelected = this.channels;
 
         this.auxUser = res.auxUser;
+        this.selectedAux = this.auxUser.id;
 
         this.webSocketService.connect(this.token!, TypeSocket.AUX, UserRole.USER, this.auxUser.id);
 
@@ -159,9 +155,42 @@ export class HomeUserComponent {
   }
   
   // Handle AUX selection change
-  onAuxChange(value: string): void {
+  onAuxChange(value: number): void {
     this.selectedAux = value;
     console.log(`Selected AUX: ${this.selectedAux}`);
+    this.syncChannelsValues(value);
+
+    this.webSocketService.disconnect();
+    this.webSocketService.connect(this.token!, TypeSocket.AUX, UserRole.MIXER, value);
+    this.manageMessage();
+  }
+
+  private manageMessage(){
+    this.webSocketService.messages().subscribe(msg => {
+      const fader = this.channels.find(f => f.id === msg.payload.channel);
+
+        if(fader){
+          if(msg.payload.value === true || msg.payload.value === false)
+            fader.switch = !msg.payload.value;
+          else
+            fader.value = parseFloat(msg.payload.value);
+        }
+    });
+  }
+
+
+  private syncChannelsValues(auxId: number){
+    this.userService.loadValues(auxId).subscribe({
+      next: (res) => {  
+        res.forEach(f => {
+          const item = this.channels.find(v => v.id === f.id);
+          if (item) {
+            item.switch = !f.switch;
+            item.value = f.value;
+          }
+        });
+      }
+    });
   }
   
   // Slider event handlers

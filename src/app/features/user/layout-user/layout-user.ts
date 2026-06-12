@@ -2,13 +2,10 @@ import { Component, effect, ElementRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../../core/services/user.service';
 import { Fader, TypeChannel } from '../../../core/models/fader.model';
+import { ChannelLayout } from '../../../core/models/channel.layout.model';
 
 type LayoutStep = 'home' | 'channels' | 'order' | 'categories';
 
-interface ChannelSelection {
-  channel: Fader;
-  selected: boolean;
-}
 
 @Component({
   selector: 'app-layout-user',
@@ -23,9 +20,7 @@ export class LayoutUserComponent {
 
   currentStep = signal<LayoutStep>('home');
 
-  allChannels: Fader[] = [];
-  channelSelections: ChannelSelection[] = [];
-  selectedChannels: Fader[] = [];
+  channelSelections: ChannelLayout[] = [];
 
   // Drag & drop (desktop)
   draggedIndex: number | null = null;
@@ -65,22 +60,14 @@ export class LayoutUserComponent {
   }
 
   private loadSceneData(): void {
-    this.userService.loadHome(this.sceneId!).subscribe({
+    this.userService.loadChannelLayout(this.sceneId!).subscribe({
       next: (res) => {
-        this.allChannels = res.fader.filter(f => f.id !== 0);
-        this.initializeChannelSelections();
+        this.channelSelections = res;
       },
       error: (err) => {
         console.error('Errore nel caricamento dei dati:', err);
       }
     });
-  }
-
-  private initializeChannelSelections(): void {
-    this.channelSelections = this.allChannels.map(channel => ({
-      channel,
-      selected: false
-    }));
   }
 
   // ===== Navigation =====
@@ -125,25 +112,19 @@ export class LayoutUserComponent {
   // ===== Step 1: Channel selection =====
   toggleChannelSelection(index: number): void {
     this.channelSelections[index].selected = !this.channelSelections[index].selected;
-    this.updateSelectedChannels();
   }
 
   selectAllChannels(): void {
     this.channelSelections.forEach(cs => cs.selected = true);
-    this.updateSelectedChannels();
   }
 
   deselectAllChannels(): void {
     this.channelSelections.forEach(cs => cs.selected = false);
-    this.updateSelectedChannels();
   }
 
-  private updateSelectedChannels(): void {
-    // Preserve previous order/types for channels still selected
-    const previous = new Map(this.selectedChannels.map(c => [c.id, c]));
-    this.selectedChannels = this.channelSelections
-      .filter(cs => cs.selected)
-      .map(cs => previous.get(cs.channel.id) ?? { ...cs.channel });
+  getSelectedChannels(): ChannelLayout[] {
+    return this.channelSelections.filter(cs => cs.selected)
+              .sort((a,b) => a.position - b.position);
   }
 
   getSelectedCount(): number {
@@ -164,8 +145,11 @@ export class LayoutUserComponent {
     const a = this.swapSourceIndex;
     const b = index;
     this.animateReorder(() => {
-      [this.selectedChannels[a], this.selectedChannels[b]] =
-        [this.selectedChannels[b], this.selectedChannels[a]];
+      const selectedChannels = this.getSelectedChannels();
+      const channelA = selectedChannels[a];
+      const channelB = selectedChannels[b];
+      // Swap positions
+      [channelA.position, channelB.position] = [channelB.position, channelA.position];
       this.swapSourceIndex = null;
     });
   }
@@ -250,9 +234,30 @@ export class LayoutUserComponent {
     if (this.draggedIndex !== null && this.draggedIndex !== dropIndex) {
       const fromIdx = this.draggedIndex;
       this.animateReorder(() => {
-        const draggedChannel = this.selectedChannels[fromIdx];
-        this.selectedChannels.splice(fromIdx, 1);
-        this.selectedChannels.splice(dropIndex, 0, draggedChannel);
+        const selectedChannels = this.getSelectedChannels();
+        const draggedChannel = selectedChannels[fromIdx];
+        const targetChannel = selectedChannels[dropIndex];
+        
+        // Reorder positions: move dragged item to target position
+        const draggedPos = draggedChannel.position;
+        const targetPos = targetChannel.position;
+        
+        if (draggedPos < targetPos) {
+          // Moving down: shift items up
+          this.channelSelections.forEach(ch => {
+            if (ch.selected && ch.position > draggedPos && ch.position <= targetPos) {
+              ch.position--;
+            }
+          });
+        } else {
+          // Moving up: shift items down
+          this.channelSelections.forEach(ch => {
+            if (ch.selected && ch.position >= targetPos && ch.position < draggedPos) {
+              ch.position++;
+            }
+          });
+        }
+        draggedChannel.position = targetPos;
       });
     }
     this.draggedIndex = null;
@@ -302,9 +307,30 @@ export class LayoutUserComponent {
       // dragged item from its current visual position to its new natural one.
       this.resetTouchDrag();
       this.animateReorder(() => {
-        const item = this.selectedChannels[from];
-        this.selectedChannels.splice(from, 1);
-        this.selectedChannels.splice(to, 0, item);
+        const selectedChannels = this.getSelectedChannels();
+        const draggedChannel = selectedChannels[from];
+        const targetChannel = selectedChannels[to];
+        
+        // Reorder positions: move dragged item to target position
+        const draggedPos = draggedChannel.position;
+        const targetPos = targetChannel.position;
+        
+        if (draggedPos < targetPos) {
+          // Moving down: shift items up
+          this.channelSelections.forEach(ch => {
+            if (ch.selected && ch.position > draggedPos && ch.position <= targetPos) {
+              ch.position--;
+            }
+          });
+        } else {
+          // Moving up: shift items down
+          this.channelSelections.forEach(ch => {
+            if (ch.selected && ch.position >= targetPos && ch.position < draggedPos) {
+              ch.position++;
+            }
+          });
+        }
+        draggedChannel.position = targetPos;
       });
       return;
     }
@@ -397,11 +423,11 @@ export class LayoutUserComponent {
   }
 
   // ===== Step 3: Categories =====
-  assignCategory(channel: Fader, categoryId: TypeChannel): void {
+  assignCategory(channel: ChannelLayout, categoryId: TypeChannel): void {
     channel.type = categoryId;
   }
 
-  clearCategory(channel: Fader): void {
+  clearCategory(channel: ChannelLayout): void {
     channel.type = null;
   }
 
@@ -410,15 +436,29 @@ export class LayoutUserComponent {
   }
 
   getCategorizedCount(): number {
-    return this.selectedChannels.filter(c => c.type !== null).length;
+    return this.channelSelections.filter(c => c.type !== null).length;
   }
 
-  // ===== Save =====
+  // ===== Default layout =====
+  applyDefaultLayout(): void {
+    const sorted = [...this.channelSelections].sort((a, b) => a.channel_id - b.channel_id);
+    sorted.forEach((ch, idx) => {
+      ch.selected = true;
+      ch.position = idx;
+    });
+    this.cancelSwap();
+  }
+
   saveLayout(): void {
-    // TODO: Implement save logic with API call
-    console.log('Saving layout:', this.selectedChannels);
-    alert('Layout salvato con successo!');
-    this.goToHome();
+    this.userService.storeChannelLayout(this.sceneId!, this.channelSelections).subscribe({
+      next: () => {
+        this.goToHome();
+      },
+      error: (err) => {
+        console.error('Errore nel salvataggio:', err);
+        alert('Errore nel salvataggio del layout');
+      }
+    });
   }
 
   // ===== Helpers =====
@@ -427,10 +467,10 @@ export class LayoutUserComponent {
   }
 
   canProceedFromOrder(): boolean {
-    return this.selectedChannels.length > 0;
+    return this.channelSelections.length > 0;
   }
 
   canSaveLayout(): boolean {
-    return this.selectedChannels.length > 0;
+    return this.channelSelections.length > 0;
   }
 }

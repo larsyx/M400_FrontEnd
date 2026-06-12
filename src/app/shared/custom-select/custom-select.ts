@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ElementRef, EventEmitter, HostListener, Input, Output, signal } from '@angular/core';
 
 export interface CustomSelectOption {
-  value: string;
+  value: number;
   label: string;
 }
 
@@ -16,12 +16,12 @@ export interface CustomSelectOption {
 export class CustomSelectComponent {
   private highlightedIndex = signal(-1);
   @Input() options: CustomSelectOption[] = [];
-  @Input() value: string | null = null;
+  @Input() value: number | null = null;
   @Input() placeholder: string = 'Select option';
   @Input() ariaLabel: string = 'Custom select';
   @Input() disabled: boolean = false;
 
-  @Output() valueChange = new EventEmitter<string>();
+  @Output() valueChange = new EventEmitter<number>();
   @Output() selectionChange = new EventEmitter<CustomSelectOption>();
 
   isOpen = signal(false);
@@ -64,7 +64,7 @@ export class CustomSelectComponent {
     this.closeDropdown();
   }
 
-  trackByValue(index: number, option: CustomSelectOption): string {
+  trackByValue(index: number, option: CustomSelectOption): number {
     return option.value;
   }
 

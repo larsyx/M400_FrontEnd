@@ -5,6 +5,7 @@ import { Observable } from "rxjs";
 import { IUserHome } from "../models/user.home.model";
 import { Fader } from "../models/fader.model";
 import { SHOW_LOADER } from "../interceptors/loader.interceptor";
+import { ChannelLayout } from "../models/channel.layout.model";
 
 const SCENE_ID_STORAGE_KEY = "user.currentSceneId";
 const SCENE_NAME_STORAGE_KEY = "user.currentSceneName";
@@ -84,6 +85,22 @@ export class UserService{
 
     loadFaderScene(aux_id : number, scene_id : number): Observable<Fader[]>{
         const url = this.API_URL + this.SCENE_PATH + `/${scene_id}/${aux_id}`;
+        return this.http.get<Fader[]>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
+    }
+
+    loadChannelLayout(sceneID: number): Observable<ChannelLayout[]>{
+        const url = this.API_URL + this.SCENE_PATH + `/${sceneID}/layout`;
+        return this.http.get<ChannelLayout[]>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
+    }
+
+    storeChannelLayout(sceneID: number, layout: ChannelLayout[]): Observable<ChannelLayout[]>{
+        const url = this.API_URL + this.SCENE_PATH + `/${sceneID}/layout`;
+        return this.http.post<ChannelLayout[]>(url, layout, { context: new HttpContext().set(SHOW_LOADER, true)});
+    }
+
+    //TODO: remove /user from api url
+    loadValues(auxId: number){
+        const url = this.API_URL + `/aux/${auxId}`;
         return this.http.get<Fader[]>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
     }
 }

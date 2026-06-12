@@ -6,7 +6,7 @@
     </header>
   }
 
-  <!-- HOME: compact vertical stepper -->
+  <!-- HOME: step cards -->
   @if (currentStep() === 'home') {
     <section class="home">
       <div class="home-lead">
@@ -14,94 +14,94 @@
         <p class="home-subtitle">Tre passaggi rapidi per personalizzare il tuo mixer.</p>
       </div>
 
-      <ol class="step-list">
-        <li>
-          <button class="step-row"
-                  [class.completed]="canProceedFromChannels()"
-                  (click)="goToStep('channels')"
-                  (dblclick)="$event.preventDefault()">
-            <span class="row-num">1</span>
-            <span class="row-body">
-              <span class="row-title">Selezione Canali</span>
-              <span class="row-meta">
-                @if (getSelectedCount() > 0) {
-                  {{ getSelectedCount() }} canali selezionati
-                } @else {
-                  Nessun canale selezionato
-                }
-              </span>
-            </span>
-            <span class="row-status">
+      <div class="step-cards">
+        <button class="step-card"
+                [class.completed]="canProceedFromChannels()"
+                (click)="goToStep('channels')"
+                (dblclick)="$event.preventDefault()">
+          <div class="step-card-top">
+            <span class="step-card-num">1</span>
+            <span class="step-card-status">
               @if (canProceedFromChannels()) {
                 <i class="bi bi-check-circle-fill"></i>
               }
             </span>
-            <i class="bi bi-chevron-right row-arrow"></i>
-          </button>
-        </li>
+          </div>
+          <div class="step-card-icon"><i class="bi bi-collection"></i></div>
+          <div class="step-card-title">Selezione Canali</div>
+          <div class="step-card-meta">
+            @if (getSelectedCount() > 0) {
+              {{ getSelectedCount() }} canali selezionati
+            } @else {
+              Nessun canale selezionato
+            }
+          </div>
+        </button>
 
-        <li>
-          <button class="step-row"
-                  [class.completed]="canProceedFromOrder() && canProceedFromChannels()"
-                  [class.locked]="!canProceedFromChannels()"
-                  [disabled]="!canProceedFromChannels()"
-                  (click)="goToStep('order')"
-                  (dblclick)="$event.preventDefault()">
-            <span class="row-num">2</span>
-            <span class="row-body">
-              <span class="row-title">Ordine Canali</span>
-              <span class="row-meta">
-                @if (!canProceedFromChannels()) {
-                  Completa prima lo step 1
-                } @else {
-                  Disponi i canali a tuo piacimento
-                }
-              </span>
-            </span>
-            <span class="row-status">
+        <button class="step-card"
+                [class.completed]="canProceedFromOrder() && canProceedFromChannels()"
+                [class.locked]="!canProceedFromChannels()"
+                [disabled]="!canProceedFromChannels()"
+                (click)="goToStep('order')"
+                (dblclick)="$event.preventDefault()">
+          <div class="step-card-top">
+            <span class="step-card-num">2</span>
+            <span class="step-card-status">
               @if (canProceedFromOrder() && canProceedFromChannels()) {
                 <i class="bi bi-check-circle-fill"></i>
               } @else if (!canProceedFromChannels()) {
                 <i class="bi bi-lock-fill"></i>
               }
             </span>
-            <i class="bi bi-chevron-right row-arrow"></i>
-          </button>
-        </li>
+          </div>
+          <div class="step-card-icon"><i class="bi bi-arrow-down-up"></i></div>
+          <div class="step-card-title">Ordine Canali</div>
+          <div class="step-card-meta">
+            @if (!canProceedFromChannels()) {
+              Completa prima lo step 1
+            } @else {
+              Disponi i canali a tuo piacimento
+            }
+          </div>
+        </button>
 
-        <li>
-          <button class="step-row"
-                  [class.completed]="canSaveLayout()"
-                  [class.locked]="!canProceedFromOrder()"
-                  [disabled]="!canProceedFromOrder()"
-                  (click)="goToStep('categories')"
-                  (dblclick)="$event.preventDefault()">
-            <span class="row-num">3</span>
-            <span class="row-body">
-              <span class="row-title">Categorie</span>
-              <span class="row-meta">
-                @if (!canProceedFromOrder()) {
-                  Completa prima lo step 2
-                } @else if (canSaveLayout()) {
-                  Tutte le categorie assegnate
-                } @else {
-                  {{ getCategorizedCount() }}/{{ selectedChannels.length }} categorizzati
-                }
-              </span>
-            </span>
-            <span class="row-status">
+        <button class="step-card"
+                [class.completed]="canSaveLayout()"
+                [class.locked]="!canProceedFromOrder()"
+                [disabled]="!canProceedFromOrder()"
+                (click)="goToStep('categories')"
+                (dblclick)="$event.preventDefault()">
+          <div class="step-card-top">
+            <span class="step-card-num">3</span>
+            <span class="step-card-status">
               @if (canSaveLayout()) {
                 <i class="bi bi-check-circle-fill"></i>
               } @else if (!canProceedFromOrder()) {
                 <i class="bi bi-lock-fill"></i>
               }
             </span>
-            <i class="bi bi-chevron-right row-arrow"></i>
-          </button>
-        </li>
-      </ol>
+          </div>
+          <div class="step-card-icon"><i class="bi bi-tags"></i></div>
+          <div class="step-card-title">Categorie</div>
+          <div class="step-card-meta">
+            @if (!canProceedFromOrder()) {
+              Completa prima lo step 2
+            } @else if (canSaveLayout()) {
+              Tutte le categorie assegnate
+            } @else {
+              {{ getCategorizedCount() }}/{{ channelSelections.length }} categorizzati
+            }
+          </div>
+        </button>
+      </div>
 
-      <div class="home-save">
+      <div class="home-actions">
+        <button class="btn-secondary btn-block"
+                (click)="applyDefaultLayout()"
+                (dblclick)="$event.preventDefault()">
+          <i class="bi bi-magic"></i>
+          <span>Applica layout predefinito</span>
+        </button>
         <button class="btn-success btn-block"
                 [disabled]="!canSaveLayout()"
                 (click)="saveLayout()"
@@ -142,7 +142,7 @@
       </div>
 
       <div class="channels-grid">
-        @for (selection of channelSelections; track selection.channel.id; let i = $index) {
+        @for (selection of channelSelections; track selection.channel_id; let i = $index) {
           <button class="channel-item"
                   [class.selected]="selection.selected"
                   (click)="toggleChannelSelection(i)"
@@ -151,9 +151,9 @@
               <i class="bi" [class.bi-check-circle-fill]="selection.selected" [class.bi-circle]="!selection.selected"></i>
             </div>
             <div class="channel-info">
-              <div class="channel-name">{{ selection.channel.name }}</div>
-              @if (selection.channel.description) {
-                <div class="channel-description">{{ selection.channel.description }}</div>
+              <div class="channel-name">{{ selection.name }}</div>
+              @if (selection.description) {
+                <div class="channel-description">{{ selection.description }}</div>
               }
             </div>
           </button>
@@ -199,10 +199,10 @@
 
       <!-- Channels card grid (drag to reorder) -->
       <div class="order-grid">
-        @for (channel of selectedChannels; track channel.id; let i = $index) {
+        @for (channel of getSelectedChannels(); track channel.channel_id; let i = $index) {
           <div class="order-card"
                [attr.data-index]="i"
-               [attr.data-channel-id]="channel.id"
+               [attr.data-channel-id]="channel.channel_id"
                [class.dragging]="draggedIndex === i"
                [class.touch-dragging]="isTouchDrag && draggedIndex === i"
                [class.drop-target]="draggedIndex !== null && dragOverIndex === i && draggedIndex !== i"
@@ -279,7 +279,7 @@
       </div>
 
       <div class="categories-list">
-        @for (channel of selectedChannels; track channel.id) {
+        @for (channel of getSelectedChannels(); track channel.channel_id) {
           <div class="category-item">
             <div class="category-channel">
               <div class="category-name">{{ channel.name }}</div>
