@@ -1,0 +1,25 @@
+<div class="admin-dashboard-page">
+  <header class="page-header">
+    <div class="page-title">Pannello di Amministrazione</div>
+    <p class="page-subtitle">Gestisci canali, scene, layout e utenti del sistema</p>
+  </header>
+
+  <section class="dashboard-grid">
+    @for (card of cards; track card.route) {
+      <a class="dashboard-card"
+         [routerLink]="card.route"
+         (dblclick)="$event.preventDefault()">
+        <div class="dashboard-card-icon">
+          <i class="bi" [class]="card.icon"></i>
+        </div>
+        <div class="dashboard-card-body">
+          <div class="dashboard-card-title">{{ card.title }}</div>
+          <div class="dashboard-card-description">{{ card.description }}</div>
+        </div>
+        <div class="dashboard-card-arrow">
+          <i class="bi bi-arrow-right-circle"></i>
+        </div>
+      </a>
+    }
+  </section>
+</div>

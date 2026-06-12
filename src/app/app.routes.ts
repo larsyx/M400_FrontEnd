@@ -4,7 +4,6 @@ import { LoginComponent } from './features/login/login';
 import { LayoutComponent } from './core/layout/layout';
 import { UserRole } from './core/models/user.model';
 import { roleGuard } from './core/auth/role.guard';
-import path from 'path';
 import { SCENE_SERVICE } from './core/services/scene.service.interface';
 import { MixerSceneService } from './core/services/mixer-scene.service';
 import { UserSceneService } from './core/services/user-scene.service';
@@ -27,6 +26,24 @@ const loadUserHomePage = () => import('./features/user/home-user/home-user')
 const loadUserLayoutPage = () => import('./features/user/layout-user/layout-user')
                 .then(m => m.LayoutUserComponent);
 
+const loadAdminDashboard = () => import('./features/admin/dashboard/dashboard')
+                .then(m => m.AdminDashboardComponent);
+
+const loadAdminChannels = () => import('./features/admin/channels/channels-admin')
+                .then(m => m.AdminChannelsComponent);
+
+const loadAdminScenesList = () => import('./features/admin/scenes/scenes-admin')
+                .then(m => m.AdminScenesComponent);
+
+const loadAdminSceneDetail = () => import('./features/admin/scenes/scene-detail/scene-detail')
+                .then(m => m.AdminSceneDetailComponent);
+
+const loadAdminLayout = () => import('./features/admin/layout/layout-admin')
+                .then(m => m.AdminLayoutComponent);
+
+const loadAdminUsers = () => import('./features/admin/users/users-admin')
+                .then(m => m.AdminUsersComponent);
+
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
     {
@@ -43,14 +60,12 @@ export const routes: Routes = [
                 canActivate: [roleGuard],
                 data : { roles: [UserRole.ADMIN] },
                 children: [
-                    {
-                        'path' : 'dashboard',
-                        loadComponent: loadHomePage
-                    },
-                    {
-                        'path' : 'users',
-                        loadComponent: loadHomePage
-                    }
+                    { path: 'dashboard',  loadComponent: loadAdminDashboard },
+                    { path: 'channels',   loadComponent: loadAdminChannels },
+                    { path: 'scenes',     loadComponent: loadAdminScenesList },
+                    { path: 'scenes/:id', loadComponent: loadAdminSceneDetail },
+                    { path: 'layout',     loadComponent: loadAdminLayout },
+                    { path: 'users',      loadComponent: loadAdminUsers }
                 ]
             },
             {

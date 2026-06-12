@@ -1,0 +1,163 @@
+<div class="admin-users-page">
+  <header class="page-header">
+    <a class="header-back icon-only"
+       routerLink="/app/admin/dashboard"
+       (dblclick)="$event.preventDefault()"
+       title="Dashboard"
+       aria-label="Dashboard">
+      <i class="bi bi-house-fill"></i>
+    </a>
+    <div class="header-info">
+      <h2 class="page-title">Gestione Utenti</h2>
+      <p class="page-subtitle">Crea, modifica ed elimina gli utenti del sistema</p>
+    </div>
+    <button class="btn-primary header-cta"
+            (click)="startCreate()"
+            (dblclick)="$event.preventDefault()">
+      <i class="bi bi-person-plus"></i><span>Nuovo utente</span>
+    </button>
+  </header>
+
+  @if (creating) {
+    <form class="create-card" (ngSubmit)="confirmCreate()">
+      <div class="create-fields">
+        <div class="field">
+          <label class="field-label" for="newUsername">Username</label>
+          <div class="field-control field-control-with-icon">
+            <span class="field-icon"><i class="bi bi-person"></i></span>
+            <input id="newUsername"
+                   type="text"
+                   class="field-input"
+                   [(ngModel)]="newUsername"
+                   name="newUsername"
+                   placeholder="Inserisci username"
+                   autocomplete="off"
+                   autofocus />
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Ruolo</label>
+          <app-custom-select
+            [options]="roleOptions"
+            [value]="getRoleValue(newRole)"
+            placeholder="Seleziona ruolo"
+            (valueChange)="onNewRoleChange($event)">
+          </app-custom-select>
+        </div>
+      </div>
+      @if (error) {
+        <div class="error-banner">
+          <i class="bi bi-exclamation-triangle"></i><span>{{ error }}</span>
+        </div>
+      }
+      <div class="create-actions">
+        <button type="button" class="btn-secondary" (click)="cancelCreate()">
+          <i class="bi bi-x-lg"></i><span>Annulla</span>
+        </button>
+        <button type="submit"
+                class="btn-success"
+                [disabled]="!newUsername.trim()">
+          <i class="bi bi-check-lg"></i><span>Crea</span>
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (users.length === 0) {
+    <div class="empty-state">
+      <i class="bi bi-people"></i>
+      <p>Nessun utente registrato</p>
+    </div>
+  } @else {
+    <div class="users-list">
+      @for (user of users; track user.id) {
+        <div class="user-row"
+             [class.editing]="editingUserId === user.id"
+             [class.confirming]="confirmDeleteId === user.id">
+          <div class="user-avatar">
+            <i class="bi bi-person-circle"></i>
+          </div>
+
+          @if (editingUserId === user.id) {
+            <div class="user-edit-fields">
+              <div class="field-control field-control-with-icon">
+                <span class="field-icon"><i class="bi bi-person"></i></span>
+                <input type="text"
+                       class="field-input"
+                       [(ngModel)]="editUsername"
+                       (keydown.enter)="saveEdit(user)"
+                       (keydown.escape)="cancelEdit()"
+                       autocomplete="off"
+                       autofocus />
+              </div>
+              <app-custom-select
+                [options]="roleOptions"
+                [value]="getRoleValue(editRole)"
+                placeholder="Ruolo"
+                (valueChange)="onEditRoleChange($event)">
+              </app-custom-select>
+              @if (error) {
+                <div class="error-banner inline">
+                  <i class="bi bi-exclamation-triangle"></i><span>{{ error }}</span>
+                </div>
+              }
+            </div>
+            <div class="user-actions">
+              <button class="icon-btn icon-btn-success"
+                      (click)="saveEdit(user)"
+                      [disabled]="!editUsername.trim()"
+                      title="Salva"
+                      aria-label="Salva">
+                <i class="bi bi-check-lg"></i>
+              </button>
+              <button class="icon-btn"
+                      (click)="cancelEdit()"
+                      title="Annulla"
+                      aria-label="Annulla">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+          } @else if (confirmDeleteId === user.id) {
+            <div class="user-info">
+              <div class="user-name">{{ user.username }}</div>
+              <span class="confirm-text">Eliminare definitivamente?</span>
+            </div>
+            <div class="user-actions">
+              <button class="icon-btn icon-btn-danger"
+                      (click)="confirmDelete(user)"
+                      title="Conferma"
+                      aria-label="Conferma eliminazione">
+                <i class="bi bi-check-lg"></i>
+              </button>
+              <button class="icon-btn"
+                      (click)="cancelDelete()"
+                      title="Annulla"
+                      aria-label="Annulla">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+          } @else {
+            <div class="user-info">
+              <div class="user-name">{{ user.username }}</div>
+              <span class="role-badge" [class]="roleBadgeClass(user.role)">{{ roleLabel(user.role) }}</span>
+            </div>
+            <div class="user-actions">
+              <button class="icon-btn"
+                      (click)="startEdit(user)"
+                      title="Modifica"
+                      aria-label="Modifica utente">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="icon-btn icon-btn-danger"
+                      (click)="requestDelete(user)"
+                      title="Elimina"
+                      aria-label="Elimina utente">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

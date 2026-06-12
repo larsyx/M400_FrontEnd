@@ -1,0 +1,163 @@
+<div class="admin-scenes-page">
+  <header class="page-header">
+    <a class="header-back icon-only"
+       routerLink="/app/admin/dashboard"
+       (dblclick)="$event.preventDefault()"
+       title="Dashboard"
+       aria-label="Dashboard">
+      <i class="bi bi-house-fill"></i>
+    </a>
+    <div class="header-info">
+      <h2 class="page-title">Gestione Scene</h2>
+      <p class="page-subtitle">Crea e organizza le scene del sistema</p>
+    </div>
+    <button class="btn-primary header-cta"
+            (click)="startCreate()"
+            (dblclick)="$event.preventDefault()">
+      <i class="bi bi-plus-lg"></i><span>Nuova scena</span>
+    </button>
+  </header>
+
+  @if (creating) {
+    <form class="create-card" (ngSubmit)="confirmCreate()">
+      <div class="create-fields">
+        <div class="field">
+          <label class="field-label" for="newSceneName">Nome scena</label>
+          <div class="field-control field-control-with-icon">
+            <span class="field-icon"><i class="bi bi-collection"></i></span>
+            <input id="newSceneName"
+                   type="text"
+                   class="field-input"
+                   [(ngModel)]="newSceneName"
+                   name="newSceneName"
+                   placeholder="Inserisci il nome"
+                   autocomplete="off"
+                   autofocus />
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="newSceneDescription">Descrizione (opzionale)</label>
+          <div class="field-control field-control-with-icon">
+            <span class="field-icon"><i class="bi bi-card-text"></i></span>
+            <input id="newSceneDescription"
+                   type="text"
+                   class="field-input"
+                   [(ngModel)]="newSceneDescription"
+                   name="newSceneDescription"
+                   placeholder="Breve descrizione della scena"
+                   autocomplete="off" />
+          </div>
+        </div>
+      </div>
+      <div class="create-actions">
+        <button type="button"
+                class="btn-secondary"
+                (click)="cancelCreate()">
+          <i class="bi bi-x-lg"></i><span>Annulla</span>
+        </button>
+        <button type="submit"
+                class="btn-success"
+                [disabled]="!newSceneName.trim()">
+          <i class="bi bi-check-lg"></i><span>Crea</span>
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (scenes.length === 0 && !creating) {
+    <div class="empty-state">
+      <i class="bi bi-collection"></i>
+      <p>Nessuna scena disponibile</p>
+      <button class="btn-primary" (click)="startCreate()">
+        <i class="bi bi-plus-lg"></i><span>Crea la prima scena</span>
+      </button>
+    </div>
+  }
+
+  @if (scenes.length > 0) {
+    <div class="scenes-grid">
+      @for (scene of scenes; track scene.id) {
+        <article class="scene-card"
+                 [class.editing]="renameSceneId === scene.id"
+                 [class.confirming]="confirmDeleteId === scene.id"
+                 (click)="openDetail(scene)">
+          <div class="scene-card-icon">
+            <i class="bi bi-collection-fill"></i>
+          </div>
+          <div class="scene-card-body">
+            @if (renameSceneId === scene.id) {
+              <input type="text"
+                     class="scene-rename-input"
+                     [(ngModel)]="renameSceneName"
+                     (click)="$event.stopPropagation()"
+                     (keydown.enter)="saveRename(scene); $event.stopPropagation()"
+                     (keydown.escape)="cancelRename()"
+                     autocomplete="off"
+                     autofocus />
+            } @else {
+              <div class="scene-card-name">{{ scene.name }}</div>
+              @if (scene.description) {
+                <div class="scene-card-description">{{ scene.description }}</div>
+              }
+            }
+            <div class="scene-card-meta">
+              <span><i class="bi bi-people"></i> {{ scene.participants.length }} partecipant{{ scene.participants.length === 1 ? 'e' : 'i' }}</span>
+            </div>
+          </div>
+
+          <div class="scene-card-actions" (click)="$event.stopPropagation()">
+            @if (confirmDeleteId === scene.id) {
+              <span class="confirm-text">Eliminare?</span>
+              <button class="icon-btn icon-btn-danger"
+                      (click)="confirmDelete(scene, $event)"
+                      title="Conferma"
+                      aria-label="Conferma eliminazione">
+                <i class="bi bi-check-lg"></i>
+              </button>
+              <button class="icon-btn"
+                      (click)="cancelDelete()"
+                      title="Annulla"
+                      aria-label="Annulla">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            } @else if (renameSceneId === scene.id) {
+              <button class="icon-btn icon-btn-success"
+                      (click)="saveRename(scene)"
+                      [disabled]="!renameSceneName.trim()"
+                      title="Salva"
+                      aria-label="Salva">
+                <i class="bi bi-check-lg"></i>
+              </button>
+              <button class="icon-btn"
+                      (click)="cancelRename()"
+                      title="Annulla"
+                      aria-label="Annulla">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            } @else {
+              <button class="icon-btn"
+                      (click)="startRename(scene, $event)"
+                      title="Rinomina"
+                      aria-label="Rinomina scena">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="icon-btn icon-btn-info"
+                      [routerLink]="['/app/admin/scenes', scene.id]"
+                      (click)="$event.stopPropagation()"
+                      title="Modifica"
+                      aria-label="Modifica scena">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button class="icon-btn icon-btn-danger"
+                      (click)="requestDelete(scene, $event)"
+                      title="Elimina"
+                      aria-label="Elimina scena">
+                <i class="bi bi-trash"></i>
+              </button>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,217 @@
+<div class="scene-detail-page">
+  @if (notFound) {
+    <div class="empty-state">
+      <i class="bi bi-exclamation-triangle"></i>
+      <p>Scena non trovata</p>
+      <button class="btn-secondary" (click)="backToList()">
+        <i class="bi bi-arrow-left"></i><span>Torna alla lista</span>
+      </button>
+    </div>
+  }
+
+  @if (scene) {
+    <header class="page-header">
+      <button class="header-back icon-only"
+              (click)="backToList()"
+              (dblclick)="$event.preventDefault()"
+              title="Lista scene"
+              aria-label="Lista scene">
+        <i class="bi bi-arrow-left"></i>
+      </button>
+      <div class="header-info">
+        <div class="header-eyebrow">Scena</div>
+        @if (editingName) {
+          <div class="name-edit-row">
+            <input type="text"
+                   class="name-input"
+                   [(ngModel)]="nameDraft"
+                   (keydown.enter)="saveName()"
+                   (keydown.escape)="cancelEditName()"
+                   autocomplete="off"
+                   autofocus />
+            <button class="icon-btn icon-btn-success"
+                    (click)="saveName()"
+                    [disabled]="!nameDraft.trim()"
+                    title="Salva"
+                    aria-label="Salva">
+              <i class="bi bi-check-lg"></i>
+            </button>
+            <button class="icon-btn"
+                    (click)="cancelEditName()"
+                    title="Annulla"
+                    aria-label="Annulla">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        } @else {
+          <div class="name-display-row">
+            <h2 class="page-title">{{ scene.name }}</h2>
+            <button class="icon-btn"
+                    (click)="startEditName()"
+                    title="Rinomina"
+                    aria-label="Rinomina">
+              <i class="bi bi-pencil"></i>
+            </button>
+          </div>
+        }
+
+        @if (editingDescription) {
+          <div class="description-edit-row">
+            <input type="text"
+                   class="description-input"
+                   [(ngModel)]="descriptionDraft"
+                   (keydown.enter)="saveDescription()"
+                   (keydown.escape)="cancelEditDescription()"
+                   placeholder="Descrizione (opzionale)"
+                   autocomplete="off"
+                   autofocus />
+            <button class="icon-btn icon-btn-success"
+                    (click)="saveDescription()"
+                    title="Salva"
+                    aria-label="Salva">
+              <i class="bi bi-check-lg"></i>
+            </button>
+            <button class="icon-btn"
+                    (click)="cancelEditDescription()"
+                    title="Annulla"
+                    aria-label="Annulla">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        } @else {
+          <div class="description-display-row">
+            @if (scene.description) {
+              <span class="page-description">{{ scene.description }}</span>
+            } @else {
+              <span class="page-description placeholder">Nessuna descrizione</span>
+            }
+            <button class="icon-btn icon-btn-sm"
+                    (click)="startEditDescription()"
+                    [title]="scene.description ? 'Modifica descrizione' : 'Aggiungi descrizione'"
+                    [attr.aria-label]="scene.description ? 'Modifica descrizione' : 'Aggiungi descrizione'">
+              <i class="bi bi-pencil"></i>
+            </button>
+          </div>
+        }
+      </div>
+      @if (saved) {
+        <div class="save-pill">
+          <i class="bi bi-check-circle-fill"></i><span>Salvato</span>
+        </div>
+      }
+    </header>
+
+    <section class="participants-section">
+      <div class="section-header">
+        <div class="section-info">
+          <h3 class="section-title">Partecipanti</h3>
+          <p class="section-subtitle">Assegna a ciascun utente un AUX dedicato</p>
+        </div>
+        <button class="btn-primary"
+                [disabled]="getAvailableUsers().length === 0"
+                (click)="openAddParticipant()">
+          <i class="bi bi-person-plus"></i><span>Aggiungi</span>
+        </button>
+      </div>
+
+      @if (scene.participants.length === 0) {
+        <div class="empty-block">
+          <i class="bi bi-person-x"></i>
+          <p>Nessun partecipante. Aggiungine uno per iniziare.</p>
+        </div>
+      } @else {
+        <div class="participants-list">
+          @for (participant of scene.participants; track participant.userId) {
+            <div class="participant-row">
+              <div class="participant-avatar">
+                <i class="bi bi-person-circle"></i>
+              </div>
+              <div class="participant-name">{{ participant.username }}</div>
+              <app-custom-select
+                class="participant-aux"
+                [options]="auxOptions"
+                [value]="participant.auxId"
+                [ariaLabel]="'AUX assegnato a ' + participant.username"
+                placeholder="Seleziona AUX"
+                (valueChange)="onAuxChange(participant.userId, $event)">
+              </app-custom-select>
+              <button class="icon-btn icon-btn-danger"
+                      (click)="removeParticipant(participant.userId)"
+                      title="Rimuovi partecipante"
+                      aria-label="Rimuovi partecipante">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <footer class="page-footer">
+      <button class="btn-secondary"
+              (click)="backToList()"
+              (dblclick)="$event.preventDefault()">
+        <i class="bi bi-x-lg"></i><span>Annulla</span>
+      </button>
+      <button class="btn-success"
+              [disabled]="saving"
+              (click)="save()"
+              (dblclick)="$event.preventDefault()">
+        <i class="bi bi-check-circle"></i><span>{{ saving ? 'Salvataggio…' : 'Salva' }}</span>
+      </button>
+    </footer>
+  }
+</div>
+
+@if (showAddModal && scene) {
+  <div class="modal-overlay" (click)="closeAddParticipant()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Aggiungi partecipante</h3>
+        <button class="icon-btn"
+                (click)="closeAddParticipant()"
+                title="Chiudi"
+                aria-label="Chiudi">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-fields">
+          <div class="field">
+            <label class="field-label">Utente</label>
+            <app-custom-select
+              [options]="userOptions"
+              [value]="pendingUserId"
+              placeholder="Seleziona utente"
+              ariaLabel="Seleziona utente"
+              (valueChange)="onPendingUserChange($event)">
+            </app-custom-select>
+          </div>
+          <div class="field">
+            <label class="field-label">AUX</label>
+            <app-custom-select
+              [options]="auxOptions"
+              [value]="pendingAuxId"
+              placeholder="Seleziona AUX"
+              ariaLabel="Seleziona AUX"
+              (valueChange)="onPendingAuxChange($event)">
+            </app-custom-select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary"
+                type="button"
+                (click)="closeAddParticipant()">
+          <i class="bi bi-x-lg"></i><span>Annulla</span>
+        </button>
+        <button class="btn-success"
+                type="button"
+                [disabled]="pendingUserId === null"
+                (click)="confirmAddParticipant()">
+          <i class="bi bi-check-lg"></i><span>Aggiungi</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}

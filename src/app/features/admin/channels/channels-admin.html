@@ -1,0 +1,98 @@
+<div class="admin-channels-page">
+  <header class="page-header">
+    <a class="header-back icon-only"
+       routerLink="/app/admin/dashboard"
+       (dblclick)="$event.preventDefault()"
+       title="Dashboard"
+       aria-label="Dashboard">
+      <i class="bi bi-house-fill"></i>
+    </a>
+    <div class="header-info">
+      <h2 class="page-title">Gestione Canali</h2>
+      <p class="page-subtitle">Seleziona, rinomina e ordina i canali</p>
+    </div>
+    @if (saved()) {
+      <div class="save-pill">
+        <i class="bi bi-check-circle-fill"></i>
+        <span>Salvato</span>
+      </div>
+    }
+  </header>
+
+  <div class="quick-actions">
+    <button class="action-btn" (click)="selectAll()" (dblclick)="$event.preventDefault()">
+      <i class="bi bi-check-all"></i><span>Tutti</span>
+    </button>
+    <button class="action-btn ghost" (click)="deselectAll()" (dblclick)="$event.preventDefault()">
+      <i class="bi bi-x-circle"></i><span>Nessuno</span>
+    </button>
+    <div class="selection-counter">
+      <span class="counter-value">{{ getSelectedCount() }}</span>
+      <span class="counter-label">selezionati</span>
+    </div>
+  </div>
+
+  <div class="channels-list">
+    @for (channel of getOrderedChannels(); track channel.id; let i = $index) {
+      <div class="channel-row"
+           [attr.data-index]="i"
+           [attr.data-channel-id]="channel.id"
+           [class.selected]="channel.selected"
+           [class.dragging]="draggedIndex === i"
+           [class.touch-dragging]="isTouchDrag && draggedIndex === i"
+           [class.drop-target]="draggedIndex !== null && dragOverIndex === i && draggedIndex !== i"
+           [style.transform]="isTouchDrag && draggedIndex === i
+              ? 'translate(' + touchDragOffsetX + 'px,' + touchDragOffsetY + 'px) scale(1.02)'
+              : null"
+           [style.zIndex]="isTouchDrag && draggedIndex === i ? 100 : null"
+           draggable="true"
+           (dragstart)="onDragStart($event, i)"
+           (dragend)="onDragEnd()"
+           (dragover)="onDragOver($event, i)"
+           (drop)="onDrop($event, i)">
+        <span class="drag-handle"
+              (touchstart)="onTouchStart($event, i)"
+              (touchmove)="onTouchMove($event)"
+              (touchend)="onTouchEnd()"
+              (touchcancel)="onTouchCancel()"
+              (click)="$event.stopPropagation()"
+              title="Trascina per riordinare"
+              aria-label="Trascina per riordinare">
+          <i class="bi bi-grip-vertical"></i>
+        </span>
+
+        <span class="position-badge">{{ i + 1 }}</span>
+
+        <button class="channel-checkbox"
+                type="button"
+                (click)="toggleSelection(channel, $event)"
+                (dblclick)="$event.preventDefault()"
+                [attr.aria-pressed]="channel.selected"
+                [attr.aria-label]="(channel.selected ? 'Deseleziona ' : 'Seleziona ') + channel.name">
+          <i class="bi"
+             [class.bi-check-circle-fill]="channel.selected"
+             [class.bi-circle]="!channel.selected"></i>
+        </button>
+
+        <div class="channel-fields">
+          <div class="channel-name">{{ channel.name }}</div>
+          <input type="text"
+                 class="channel-description-input"
+                 [(ngModel)]="channel.description"
+                 placeholder="Descrizione (opzionale)"
+                 autocomplete="off"
+                 (click)="$event.stopPropagation()"
+                 [attr.aria-label]="'Descrizione di ' + channel.name" />
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="page-footer">
+    <button class="btn-success btn-block"
+            (click)="save()"
+            (dblclick)="$event.preventDefault()">
+      <i class="bi bi-check-circle"></i><span>Salva</span>
+    </button>
+  </div>
+</div>

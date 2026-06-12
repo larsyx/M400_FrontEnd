@@ -33,6 +33,24 @@ export const MENU_ITEMS: MenuItem[] = [
         roles: [UserRole.ADMIN]
     },
     {
+        label: 'Canali',
+        route: '/app/admin/channels',
+        icon: 'sliders',
+        roles: [UserRole.ADMIN]
+    },
+    {
+        label: 'Scene',
+        route: '/app/admin/scenes',
+        icon: 'collection',
+        roles: [UserRole.ADMIN]
+    },
+    {
+        label: 'Layout',
+        route: '/app/admin/layout',
+        icon: 'layout-text-window',
+        roles: [UserRole.ADMIN]
+    },
+    {
         label: 'Utenti',
         route: '/app/admin/users',
         icon: 'people',
@@ -42,8 +60,8 @@ export const MENU_ITEMS: MenuItem[] = [
         label: 'Scene',
         route: '/app/mixer/scene',
         icon: 'collection',
-        roles: [UserRole.ADMIN, UserRole.MIXER]
-    },    
+        roles: [UserRole.MIXER]
+    },
     {
         label: 'Scene',
         route: '/app/user/scene',
