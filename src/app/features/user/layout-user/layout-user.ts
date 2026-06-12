@@ -439,18 +439,27 @@ export class LayoutUserComponent {
     return this.channelSelections.filter(c => c.type !== null).length;
   }
 
-  // ===== Default layout =====
   applyDefaultLayout(): void {
-    const sorted = [...this.channelSelections].sort((a, b) => a.channel_id - b.channel_id);
-    sorted.forEach((ch, idx) => {
-      ch.selected = true;
-      ch.position = idx;
+    this.userService.storeDefaultChannelLayout(this.sceneId!).subscribe({
+      next: (res) => {
+        this.channelSelections = res;
+      },
+      error: (err) => {
+        console.error('Errore nel recupero del layout predefinito:', err);
+      }
     });
-    this.cancelSwap();
   }
 
   saveLayout(): void {
-    this.userService.storeChannelLayout(this.sceneId!, this.channelSelections).subscribe({
+    const selectedChannels = this.channelSelections
+      .filter(ch => ch.selected)
+      .sort((a, b) => a.position - b.position);
+    
+    selectedChannels.forEach((ch, index) => {
+      ch.position = index;
+    });
+    
+    this.userService.storeChannelLayout(this.sceneId!, selectedChannels).subscribe({
       next: () => {
         this.goToHome();
       },

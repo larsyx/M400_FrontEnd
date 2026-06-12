@@ -99,6 +99,10 @@ export class UserService{
         return this.http.post<ChannelLayout[]>(url, layout, { context: new HttpContext().set(SHOW_LOADER, true)});
     }
 
+    storeDefaultChannelLayout(sceneID: number): Observable<ChannelLayout[]>{
+        const url = this.API_URL + this.SCENE_PATH + `/${sceneID}/layout/default`;
+        return this.http.put<ChannelLayout[]>(url, {}, { context: new HttpContext().set(SHOW_LOADER, true)});
+    }
     //TODO: remove /user from api url
     loadValues(auxId: number){
         const url = this.API_URL + `/aux/${auxId}`;
