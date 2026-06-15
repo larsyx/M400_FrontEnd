@@ -121,22 +121,25 @@
         </div>
       } @else {
         <div class="participants-list">
-          @for (participant of scene.participants; track participant.userId) {
+          @for (participant of scene.participants; track participant.username) {
             <div class="participant-row">
               <div class="participant-avatar">
                 <i class="bi bi-person-circle"></i>
               </div>
-              <div class="participant-name">{{ participant.username }}</div>
+              <div class="participant-info">
+                <div class="participant-name">{{ getParticipantName(participant.username) }}</div>
+                <div class="participant-username"><i class="bi bi-at"></i>{{ participant.username }}</div>
+              </div>
               <app-custom-select
                 class="participant-aux"
                 [options]="auxOptions"
                 [value]="participant.auxId"
                 [ariaLabel]="'AUX assegnato a ' + participant.username"
                 placeholder="Seleziona AUX"
-                (valueChange)="onAuxChange(participant.userId, $event)">
+                (valueChange)="onAuxChange(participant.username, $event)">
               </app-custom-select>
               <button class="icon-btn icon-btn-danger"
-                      (click)="removeParticipant(participant.userId)"
+                      (click)="removeParticipant(participant.username)"
                       title="Rimuovi partecipante"
                       aria-label="Rimuovi partecipante">
                 <i class="bi bi-trash"></i>
@@ -181,7 +184,7 @@
             <label class="field-label">Utente</label>
             <app-custom-select
               [options]="userOptions"
-              [value]="pendingUserId"
+              [value]="pendingUserIndex"
               placeholder="Seleziona utente"
               ariaLabel="Seleziona utente"
               (valueChange)="onPendingUserChange($event)">
@@ -207,7 +210,7 @@
         </button>
         <button class="btn-success"
                 type="button"
-                [disabled]="pendingUserId === null"
+                [disabled]="pendingUserIndex === null"
                 (click)="confirmAddParticipant()">
           <i class="bi bi-check-lg"></i><span>Aggiungi</span>
         </button>

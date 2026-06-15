@@ -278,6 +278,13 @@
   i { font-size: clamp(1.3rem, 2.5vw, 1.5rem); }
 }
 
+.participant-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
 .participant-name {
   font-size: clamp(0.9rem, 1.8vw, 1rem);
   font-weight: 600;
@@ -285,6 +292,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.participant-username {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: clamp(0.72rem, 1.4vw, 0.8rem);
+  color: #6c757d;
+  font-weight: 500;
+  line-height: 1.2;
+
+  i { font-size: 0.95em; opacity: 0.8; }
 }
 
 .participant-aux {
@@ -519,6 +538,8 @@
   .header-info .page-title,
   .section-info .section-title,
   .participant-name { color: #f7fafc; }
+
+  .participant-username { color: #a0aec0; }
 
   .header-info .header-eyebrow {
     background: #63b3ed;

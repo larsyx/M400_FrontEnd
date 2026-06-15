@@ -1,7 +1,7 @@
 import { UserRole } from "./user.model";
 
 export interface AdminUser {
-    id: number;
+    name: string;
     username: string;
     role: UserRole;
 }

@@ -15,10 +15,10 @@ const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 const ROLE_VALUES: UserRole[] = [
-    UserRole.ADMIN,
+    UserRole.USER,
     UserRole.MIXER,
     UserRole.VIDEO,
-    UserRole.USER
+    UserRole.ADMIN
 ];
 
 @Component({
@@ -32,14 +32,16 @@ export class AdminUsersComponent implements OnInit {
     users: AdminUser[] = [];
 
     creating = false;
+    newName = '';
     newUsername = '';
     newRole: UserRole = UserRole.USER;
 
-    editingUserId: number | null = null;
+    editingUserId: string | null = null;
+    editName = '';
     editUsername = '';
     editRole: UserRole = UserRole.USER;
 
-    confirmDeleteId: number | null = null;
+    confirmDeleteId: string | null = null;
     error: string | null = null;
 
     roleOptions: CustomSelectOption[] = ROLE_VALUES.map((role, idx) => ({
@@ -56,7 +58,7 @@ export class AdminUsersComponent implements OnInit {
     private loadUsers(): void {
         this.adminService.listUsers().subscribe(users => {
             this.users = [...users].sort((a, b) =>
-                a.username.localeCompare(b.username, 'it', { sensitivity: 'base' })
+                a.name.localeCompare(b.name, 'it', { sensitivity: 'base' })
             );
         });
     }
@@ -73,9 +75,10 @@ export class AdminUsersComponent implements OnInit {
         return ROLE_VALUES[value] ?? UserRole.USER;
     }
 
-    // ===== Create =====
+    
     startCreate(): void {
         this.creating = true;
+        this.newName = '';
         this.newUsername = '';
         this.newRole = UserRole.USER;
         this.cancelEdit();
@@ -85,6 +88,7 @@ export class AdminUsersComponent implements OnInit {
 
     cancelCreate(): void {
         this.creating = false;
+        this.newName = '';
         this.newUsername = '';
         this.error = null;
     }
@@ -93,18 +97,23 @@ export class AdminUsersComponent implements OnInit {
         this.newRole = this.resolveRole(value);
     }
 
+    canCreate(): boolean {
+        return this.newName.trim().length > 0 && this.newUsername.trim().length > 0;
+    }
+
     confirmCreate(): void {
+        const name = this.newName.trim();
         const username = this.newUsername.trim();
-        if (!username) return;
+        if (!name || !username) return;
         if (this.adminService.isUsernameTaken(username)) {
             this.error = 'Username già in uso';
             return;
         }
 
-        this.adminService.createUser({ username, role: this.newRole }).subscribe({
+        this.adminService.createUser({ name, username, role: this.newRole }).subscribe({
             next: (created) => {
                 this.users = [...this.users, created].sort((a, b) =>
-                    a.username.localeCompare(b.username, 'it', { sensitivity: 'base' })
+                    a.name.localeCompare(b.name, 'it', { sensitivity: 'base' })
                 );
                 this.cancelCreate();
             }
@@ -113,7 +122,8 @@ export class AdminUsersComponent implements OnInit {
 
     // ===== Edit =====
     startEdit(user: AdminUser): void {
-        this.editingUserId = user.id;
+        this.editingUserId = user.username;
+        this.editName = user.name;
         this.editUsername = user.username;
         this.editRole = user.role;
         this.confirmDeleteId = null;
@@ -123,6 +133,7 @@ export class AdminUsersComponent implements OnInit {
 
     cancelEdit(): void {
         this.editingUserId = null;
+        this.editName = '';
         this.editUsername = '';
         this.editRole = UserRole.USER;
         this.error = null;
@@ -132,24 +143,32 @@ export class AdminUsersComponent implements OnInit {
         this.editRole = this.resolveRole(value);
     }
 
+    canSaveEdit(): boolean {
+        return this.editName.trim().length > 0 && this.editUsername.trim().length > 0;
+    }
+
     saveEdit(user: AdminUser): void {
+        const name = this.editName.trim();
         const username = this.editUsername.trim();
-        if (!username) {
+        if (!name || !username) {
             this.cancelEdit();
             return;
         }
-        if (this.adminService.isUsernameTaken(username, user.id)) {
+        if (this.adminService.isUsernameTaken(username, user.username)) {
             this.error = 'Username già in uso';
             return;
         }
 
-        const updated: AdminUser = { ...user, username, role: this.editRole };
-        this.adminService.updateUser(updated).subscribe({
+        const updated: AdminUser = { ...user, name, username, role: this.editRole };
+        this.adminService.updateUser(updated, user.username).subscribe({
             next: (saved) => {
-                const idx = this.users.findIndex(u => u.id === saved.id);
-                if (idx >= 0) this.users[idx] = saved;
+                const finalUser: AdminUser = saved && saved.name && saved.username
+                    ? saved
+                    : updated;
+                const idx = this.users.findIndex(u => u.username === user.username);
+                if (idx >= 0) this.users[idx] = finalUser;
                 this.users = [...this.users].sort((a, b) =>
-                    a.username.localeCompare(b.username, 'it', { sensitivity: 'base' })
+                    a.name.localeCompare(b.name, 'it', { sensitivity: 'base' })
                 );
                 this.cancelEdit();
             }
@@ -158,7 +177,7 @@ export class AdminUsersComponent implements OnInit {
 
     // ===== Delete =====
     requestDelete(user: AdminUser): void {
-        this.confirmDeleteId = user.id;
+        this.confirmDeleteId = user.username;
         this.cancelEdit();
     }
 
@@ -167,9 +186,9 @@ export class AdminUsersComponent implements OnInit {
     }
 
     confirmDelete(user: AdminUser): void {
-        this.adminService.deleteUser(user.id).subscribe({
+        this.adminService.deleteUser(user.username).subscribe({
             next: () => {
-                this.users = this.users.filter(u => u.id !== user.id);
+                this.users = this.users.filter(u => u.username !== user.username);
                 this.confirmDeleteId = null;
             }
         });

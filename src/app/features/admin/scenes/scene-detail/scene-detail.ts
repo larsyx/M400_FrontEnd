@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -8,6 +8,7 @@ import { AdminUser } from '../../../../core/models/admin.user.model';
 import { IAuxs } from '../../../../core/models/auxs.model';
 import { UserRole } from '../../../../core/models/user.model';
 import { CustomSelectComponent, CustomSelectOption } from '../../../../shared/custom-select/custom-select';
+import { CanComponentDeactivate } from '../../../../core/auth/can-deactivate.guard';
 
 @Component({
     selector: 'app-admin-scene-detail',
@@ -16,7 +17,7 @@ import { CustomSelectComponent, CustomSelectOption } from '../../../../shared/cu
     templateUrl: './scene-detail.html',
     styleUrl: './scene-detail.scss'
 })
-export class AdminSceneDetailComponent implements OnInit {
+export class AdminSceneDetailComponent implements OnInit, CanComponentDeactivate {
     scene: AdminScene | null = null;
     sceneId: number | null = null;
     notFound = false;
@@ -32,12 +33,18 @@ export class AdminSceneDetailComponent implements OnInit {
 
     allUsers: AdminUser[] = [];
     showAddModal = false;
-    pendingUserId: number | null = null;
+
+    // Add-participant modal state — pendingUserIndex maps to availableUsers[index].
+    // CustomSelectOption.value is numeric, so we use the index as a stable handle.
+    private availableUsers: AdminUser[] = [];
+    pendingUserIndex: number | null = null;
     pendingAuxId: number | null = null;
     userOptions: CustomSelectOption[] = [];
 
     saving = false;
     saved = false;
+
+    private originalSnapshot: string | null = null;
 
     constructor(
         private route: ActivatedRoute,
@@ -67,15 +74,43 @@ export class AdminSceneDetailComponent implements OnInit {
 
         this.adminService.getScene(this.sceneId!).subscribe({
             next: (scene) => {
-                if (!scene) {
-                    this.notFound = true;
-                    return;
-                }
                 this.scene = scene;
                 this.nameDraft = scene.name;
                 this.descriptionDraft = scene.description ?? '';
+                this.originalSnapshot = this.snapshotScene(scene);
+            },
+            error: () => {
+                this.notFound = true;
             }
         });
+    }
+
+    private snapshotScene(scene: AdminScene): string {
+        return JSON.stringify({
+            name: scene.name,
+            description: scene.description ?? '',
+            participants: [...scene.participants]
+                .sort((a, b) => a.username.localeCompare(b.username))
+                .map(p => ({ username: p.username, auxId: p.auxId }))
+        });
+    }
+
+    isDirty(): boolean {
+        if (!this.scene || this.originalSnapshot === null) return false;
+        return this.snapshotScene(this.scene) !== this.originalSnapshot;
+    }
+
+    canDeactivate(): boolean {
+        if (!this.isDirty()) return true;
+        return window.confirm('Hai modifiche non salvate. Vuoi davvero uscire? Le modifiche andranno perse.');
+    }
+
+    @HostListener('window:beforeunload', ['$event'])
+    onBeforeUnload(event: BeforeUnloadEvent): void {
+        if (this.isDirty()) {
+            event.preventDefault();
+            event.returnValue = '';
+        }
     }
 
     // ===== Name editing =====
@@ -123,27 +158,30 @@ export class AdminSceneDetailComponent implements OnInit {
     // ===== Participants =====
     getAvailableUsers(): AdminUser[] {
         if (!this.scene) return [];
-        const used = new Set(this.scene.participants.map(p => p.userId));
-        return this.allUsers.filter(u => !used.has(u.id));
+        const used = new Set(this.scene.participants.map(p => p.username));
+        return this.allUsers.filter(u => !used.has(u.username));
     }
 
     openAddParticipant(): void {
-        const available = this.getAvailableUsers();
-        if (available.length === 0) return;
-        this.userOptions = available.map(u => ({ value: u.id, label: u.username }));
-        this.pendingUserId = available[0].id;
+        this.availableUsers = this.getAvailableUsers();
+        if (this.availableUsers.length === 0) return;
+        this.userOptions = this.availableUsers.map((u, idx) => ({
+            value: idx,
+            label: u.name ? `${u.name} (${u.username})` : u.username
+        }));
+        this.pendingUserIndex = 0;
         this.pendingAuxId = this.auxs[0]?.id ?? null;
         this.showAddModal = true;
     }
 
     closeAddParticipant(): void {
         this.showAddModal = false;
-        this.pendingUserId = null;
+        this.pendingUserIndex = null;
         this.pendingAuxId = null;
     }
 
     onPendingUserChange(value: number): void {
-        this.pendingUserId = value;
+        this.pendingUserIndex = value;
     }
 
     onPendingAuxChange(value: number): void {
@@ -151,25 +189,40 @@ export class AdminSceneDetailComponent implements OnInit {
     }
 
     confirmAddParticipant(): void {
-        if (!this.scene || this.pendingUserId === null) return;
-        const user = this.allUsers.find(u => u.id === this.pendingUserId);
+        if (!this.scene || this.pendingUserIndex === null) return;
+        const user = this.availableUsers[this.pendingUserIndex];
         if (!user) return;
         this.scene.participants = [
             ...this.scene.participants,
-            { userId: user.id, username: user.username, auxId: this.pendingAuxId }
+            { username: user.username, auxId: this.pendingAuxId }
         ];
-        this.closeAddParticipant();
+
+        this.availableUsers = this.getAvailableUsers();
+        if (this.availableUsers.length === 0) {
+            this.closeAddParticipant();
+            return;
+        }
+        this.userOptions = this.availableUsers.map((u, idx) => ({
+            value: idx,
+            label: u.name ? `${u.name} (${u.username})` : u.username
+        }));
+        this.pendingUserIndex = 0;
+        this.pendingAuxId = this.auxs[0]?.id ?? null;
     }
 
-    removeParticipant(userId: number): void {
+    removeParticipant(username: string): void {
         if (!this.scene) return;
-        this.scene.participants = this.scene.participants.filter(p => p.userId !== userId);
+        this.scene.participants = this.scene.participants.filter(p => p.username !== username);
     }
 
-    onAuxChange(userId: number, auxId: number): void {
+    onAuxChange(username: string, auxId: number): void {
         if (!this.scene) return;
-        const participant = this.scene.participants.find(p => p.userId === userId);
+        const participant = this.scene.participants.find(p => p.username === username);
         if (participant) participant.auxId = auxId;
+    }
+
+    getParticipantName(username: string): string {
+        return this.allUsers.find(u => u.username === username)?.name ?? username;
     }
 
     getAuxName(auxId: number | null): string {
@@ -185,6 +238,8 @@ export class AdminSceneDetailComponent implements OnInit {
             next: (saved) => {
                 this.scene = saved;
                 this.nameDraft = saved.name;
+                this.descriptionDraft = saved.description ?? '';
+                this.originalSnapshot = this.snapshotScene(saved);
                 this.saving = false;
                 this.saved = true;
                 setTimeout(() => this.saved = false, 2000);

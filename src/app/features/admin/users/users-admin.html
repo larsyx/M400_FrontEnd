@@ -22,17 +22,30 @@
     <form class="create-card" (ngSubmit)="confirmCreate()">
       <div class="create-fields">
         <div class="field">
+          <label class="field-label" for="newName">Nome</label>
+          <div class="field-control field-control-with-icon">
+            <span class="field-icon"><i class="bi bi-person-vcard"></i></span>
+            <input id="newName"
+                   type="text"
+                   class="field-input"
+                   [(ngModel)]="newName"
+                   name="newName"
+                   placeholder="Nome e cognome"
+                   autocomplete="off"
+                   autofocus />
+          </div>
+        </div>
+        <div class="field">
           <label class="field-label" for="newUsername">Username</label>
           <div class="field-control field-control-with-icon">
-            <span class="field-icon"><i class="bi bi-person"></i></span>
+            <span class="field-icon"><i class="bi bi-at"></i></span>
             <input id="newUsername"
                    type="text"
                    class="field-input"
                    [(ngModel)]="newUsername"
                    name="newUsername"
-                   placeholder="Inserisci username"
-                   autocomplete="off"
-                   autofocus />
+                   placeholder="Identificativo univoco"
+                   autocomplete="off" />
           </div>
         </div>
         <div class="field">
@@ -56,7 +69,7 @@
         </button>
         <button type="submit"
                 class="btn-success"
-                [disabled]="!newUsername.trim()">
+                [disabled]="!canCreate()">
           <i class="bi bi-check-lg"></i><span>Crea</span>
         </button>
       </div>
@@ -70,32 +83,52 @@
     </div>
   } @else {
     <div class="users-list">
-      @for (user of users; track user.id) {
+      @for (user of users; track user.username) {
         <div class="user-row"
-             [class.editing]="editingUserId === user.id"
-             [class.confirming]="confirmDeleteId === user.id">
+             [class.editing]="editingUserId === user.username"
+             [class.confirming]="confirmDeleteId === user.username">
           <div class="user-avatar">
             <i class="bi bi-person-circle"></i>
           </div>
 
-          @if (editingUserId === user.id) {
+          @if (editingUserId === user.username) {
             <div class="user-edit-fields">
-              <div class="field-control field-control-with-icon">
-                <span class="field-icon"><i class="bi bi-person"></i></span>
-                <input type="text"
-                       class="field-input"
-                       [(ngModel)]="editUsername"
-                       (keydown.enter)="saveEdit(user)"
-                       (keydown.escape)="cancelEdit()"
-                       autocomplete="off"
-                       autofocus />
+              <div class="field">
+                <label class="field-label">Nome</label>
+                <div class="field-control field-control-with-icon">
+                  <span class="field-icon"><i class="bi bi-person-vcard"></i></span>
+                  <input type="text"
+                         class="field-input"
+                         [(ngModel)]="editName"
+                         (keydown.enter)="saveEdit(user)"
+                         (keydown.escape)="cancelEdit()"
+                         placeholder="Nome e cognome"
+                         autocomplete="off"
+                         autofocus />
+                </div>
               </div>
-              <app-custom-select
-                [options]="roleOptions"
-                [value]="getRoleValue(editRole)"
-                placeholder="Ruolo"
-                (valueChange)="onEditRoleChange($event)">
-              </app-custom-select>
+              <div class="field">
+                <label class="field-label">Username</label>
+                <div class="field-control field-control-with-icon">
+                  <span class="field-icon"><i class="bi bi-at"></i></span>
+                  <input type="text"
+                         class="field-input"
+                         [(ngModel)]="editUsername"
+                         (keydown.enter)="saveEdit(user)"
+                         (keydown.escape)="cancelEdit()"
+                         placeholder="Identificativo univoco"
+                         autocomplete="off" />
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Ruolo</label>
+                <app-custom-select
+                  [options]="roleOptions"
+                  [value]="getRoleValue(editRole)"
+                  placeholder="Ruolo"
+                  (valueChange)="onEditRoleChange($event)">
+                </app-custom-select>
+              </div>
               @if (error) {
                 <div class="error-banner inline">
                   <i class="bi bi-exclamation-triangle"></i><span>{{ error }}</span>
@@ -105,7 +138,7 @@
             <div class="user-actions">
               <button class="icon-btn icon-btn-success"
                       (click)="saveEdit(user)"
-                      [disabled]="!editUsername.trim()"
+                      [disabled]="!canSaveEdit()"
                       title="Salva"
                       aria-label="Salva">
                 <i class="bi bi-check-lg"></i>
@@ -117,9 +150,10 @@
                 <i class="bi bi-x-lg"></i>
               </button>
             </div>
-          } @else if (confirmDeleteId === user.id) {
+          } @else if (confirmDeleteId === user.username) {
             <div class="user-info">
-              <div class="user-name">{{ user.username }}</div>
+              <div class="user-name">{{ user.name }}</div>
+              <div class="user-username"><i class="bi bi-at"></i>{{ user.username }}</div>
               <span class="confirm-text">Eliminare definitivamente?</span>
             </div>
             <div class="user-actions">
@@ -138,7 +172,8 @@
             </div>
           } @else {
             <div class="user-info">
-              <div class="user-name">{{ user.username }}</div>
+              <div class="user-name">{{ user.name }}</div>
+              <div class="user-username"><i class="bi bi-at"></i>{{ user.username }}</div>
               <span class="role-badge" [class]="roleBadgeClass(user.role)">{{ roleLabel(user.role) }}</span>
             </div>
             <div class="user-actions">

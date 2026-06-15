@@ -18,9 +18,6 @@ export class AdminScenesComponent implements OnInit {
     newSceneName = '';
     newSceneDescription = '';
 
-    renameSceneId: number | null = null;
-    renameSceneName = '';
-
     confirmDeleteId: number | null = null;
 
     constructor(
@@ -42,7 +39,6 @@ export class AdminScenesComponent implements OnInit {
         this.creating = true;
         this.newSceneName = '';
         this.newSceneDescription = '';
-        this.cancelRename();
         this.cancelDelete();
     }
 
@@ -67,42 +63,13 @@ export class AdminScenesComponent implements OnInit {
     }
 
     openDetail(scene: AdminScene): void {
-        if (this.renameSceneId === scene.id || this.confirmDeleteId === scene.id) return;
+        if (this.confirmDeleteId === scene.id) return;
         this.router.navigate(['/app/admin/scenes', scene.id]);
-    }
-
-    startRename(scene: AdminScene, event: Event): void {
-        event.stopPropagation();
-        this.renameSceneId = scene.id;
-        this.renameSceneName = scene.name;
-        this.confirmDeleteId = null;
-    }
-
-    cancelRename(): void {
-        this.renameSceneId = null;
-        this.renameSceneName = '';
-    }
-
-    saveRename(scene: AdminScene): void {
-        const name = this.renameSceneName.trim();
-        if (!name) {
-            this.cancelRename();
-            return;
-        }
-        const updated: AdminScene = { ...scene, name };
-        this.adminService.updateScene(updated).subscribe({
-            next: (saved) => {
-                const idx = this.scenes.findIndex(s => s.id === saved.id);
-                if (idx >= 0) this.scenes[idx] = saved;
-                this.cancelRename();
-            }
-        });
     }
 
     requestDelete(scene: AdminScene, event: Event): void {
         event.stopPropagation();
         this.confirmDeleteId = scene.id;
-        this.cancelRename();
     }
 
     cancelDelete(): void {

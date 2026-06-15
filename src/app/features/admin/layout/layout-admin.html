@@ -88,11 +88,6 @@
       </div>
 
       <div class="home-actions">
-        <button class="btn-secondary btn-block"
-                (click)="applyDefaultPreset()"
-                (dblclick)="$event.preventDefault()">
-          <i class="bi bi-magic"></i><span>Ripristina layout suggerito</span>
-        </button>
         <button class="btn-success btn-block"
                 [disabled]="!canSaveLayout()"
                 (click)="saveLayout()"

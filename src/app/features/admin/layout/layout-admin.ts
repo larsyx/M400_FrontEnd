@@ -348,13 +348,7 @@ export class AdminLayoutComponent implements OnInit {
         return this.channelSelections.filter(c => c.type !== null).length;
     }
 
-    // ===== Apply default / save =====
-    applyDefaultPreset(): void {
-        this.adminService.applyDefaultPreset().subscribe({
-            next: (res) => this.channelSelections = res
-        });
-    }
-
+    // ===== Save =====
     saveLayout(): void {
         const selectedChannels = this.channelSelections
             .filter(ch => ch.selected)

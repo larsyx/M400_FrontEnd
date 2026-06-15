@@ -4,6 +4,7 @@ import { LoginComponent } from './features/login/login';
 import { LayoutComponent } from './core/layout/layout';
 import { UserRole } from './core/models/user.model';
 import { roleGuard } from './core/auth/role.guard';
+import { canDeactivateGuard } from './core/auth/can-deactivate.guard';
 import { SCENE_SERVICE } from './core/services/scene.service.interface';
 import { MixerSceneService } from './core/services/mixer-scene.service';
 import { UserSceneService } from './core/services/user-scene.service';
@@ -63,7 +64,7 @@ export const routes: Routes = [
                     { path: 'dashboard',  loadComponent: loadAdminDashboard },
                     { path: 'channels',   loadComponent: loadAdminChannels },
                     { path: 'scenes',     loadComponent: loadAdminScenesList },
-                    { path: 'scenes/:id', loadComponent: loadAdminSceneDetail },
+                    { path: 'scenes/:id', loadComponent: loadAdminSceneDetail, canDeactivate: [canDeactivateGuard] },
                     { path: 'layout',     loadComponent: loadAdminLayout },
                     { path: 'users',      loadComponent: loadAdminUsers }
                 ]
