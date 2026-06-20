@@ -8,13 +8,13 @@ import { AdminChannel } from '../../../core/models/admin.channel.model';
 import { Channel } from '../../../core/models/channel.model';
 
 @Component({
-    selector: 'app-admin-channels',
+    selector: 'app-mixer-channels',
     standalone: true,
     imports: [CommonModule, FormsModule, RouterModule],
-    templateUrl: './channels-admin.html',
-    styleUrl: './channels-admin.scss'
+    templateUrl: './channels-mixer.html',
+    styleUrl: '../../admin/channels/channels-admin.scss'
 })
-export class AdminChannelsComponent implements OnInit {
+export class MixerChannelsComponent implements OnInit {
     channels: AdminChannel[] = [];
     saved = signal(false);
 

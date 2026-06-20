@@ -15,6 +15,9 @@ const loadHomePage = () => import('./features/mixer/home-page/home-page')
 const loadDcaPage = () => import('./features/mixer/pages/dca/dca')
                 .then(m => m.Dca);
 
+const loadMixerChannels = () => import('./features/mixer/channels/channels-mixer')
+                .then(m => m.MixerChannelsComponent);
+
 const loadScenesPage = () => import('./shared/scenes/scenes')
                 .then(m => m.ScenesComponent);
 
@@ -81,6 +84,10 @@ export const routes: Routes = [
                     {
                         'path' : 'dca',
                         loadComponent : loadDcaPage
+                    },
+                    {
+                        'path' : 'channels',
+                        loadComponent : loadMixerChannels
                     },
                     {
                         'path' : 'scene',

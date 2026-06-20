@@ -79,6 +79,11 @@ export class UserService{
 
     }
 
+    loadFaderNames(): Observable<Fader[]>{
+        const url = this.API_URL + "/fader/names";
+        return this.http.get<Fader[]>(url);
+    }
+
     loadFader(aux_id : number): Observable<Fader[]>{
         const url = this.API_URL + `/${aux_id}`;
         return this.http.get<Fader[]>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
@@ -133,6 +138,6 @@ export class UserService{
     loadProfile(sceneId: number, profile_id: number, aux_id: number): Observable<Fader[]> {
         const url = `${this.API_URL}${this.SCENE_PATH}/${sceneId}/profile/${profile_id}/${aux_id}`;
         
-        return this.http.get<Fader[]>(url, { context: new HttpContext().set(SHOW_LOADER, true)});
+        return this.http.get<Fader[]>(url);
     }
 }

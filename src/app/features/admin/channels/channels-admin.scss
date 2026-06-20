@@ -304,10 +304,27 @@
   .channel-name {
     flex: 0 0 auto;
     min-width: clamp(80px, 12vw, 110px);
-    font-size: clamp(0.9rem, 1.8vw, 1.05rem);
-    font-weight: 600;
-    color: #1a202c;
-    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+
+    .channel-name-text {
+      font-size: clamp(0.9rem, 1.8vw, 1.05rem);
+      font-weight: 600;
+      color: #1a202c;
+      white-space: nowrap;
+    }
+
+    .channel-mixer-description {
+      font-size: clamp(0.7rem, 1.3vw, 0.78rem);
+      font-weight: 500;
+      color: #6c757d;
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: clamp(120px, 18vw, 180px);
+    }
   }
 
   .channel-description-input {

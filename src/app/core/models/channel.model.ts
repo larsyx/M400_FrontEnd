@@ -1,11 +1,9 @@
 import { TypeChannel } from "./fader.model";
 
-export interface AdminChannel {
+export interface Channel {
     id: number;
     name: string;
     description: string;
-    mixerDescription: string;
     type: TypeChannel | null;
-    selected: boolean;
-    position: number;
+    position: number | null;
 }

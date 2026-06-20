@@ -105,7 +105,7 @@ export class AdminUsersComponent implements OnInit {
         const name = this.newName.trim();
         const username = this.newUsername.trim();
         if (!name || !username) return;
-        if (this.adminService.isUsernameTaken(username)) {
+        if (this.isUsernameTaken(username)) {
             this.error = 'Username già in uso';
             return;
         }
@@ -154,7 +154,7 @@ export class AdminUsersComponent implements OnInit {
             this.cancelEdit();
             return;
         }
-        if (this.adminService.isUsernameTaken(username, user.username)) {
+        if (this.isUsernameTaken(username, user.username)) {
             this.error = 'Username già in uso';
             return;
         }
@@ -173,6 +173,14 @@ export class AdminUsersComponent implements OnInit {
                 this.cancelEdit();
             }
         });
+    }
+
+    isUsernameTaken(username: string, excludeUsername?: string): boolean {
+        const target = username.trim().toLowerCase();
+        const exclude = excludeUsername?.toLowerCase();
+        return this.users.some(u =>
+            u.username.toLowerCase() === target && u.username.toLowerCase() !== exclude
+        );
     }
 
     // ===== Delete =====

@@ -5,7 +5,8 @@ export interface Fader{
     value: number,
     switch: boolean,
     type: TypeChannel | null,
-    link: boolean
+    link: boolean,
+    position: number | null
 }
 
 export enum TypeChannel{

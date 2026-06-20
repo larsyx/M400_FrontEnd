@@ -46,6 +46,8 @@ export class HomeUserComponent {
   
   // Group control step
   readonly GROUP_CONTROL_STEP = 0.2; // Step in dB
+  private readonly GROUP_REPEAT_INTERVAL_MS = 60;
+  private groupRepeatTimer: number | null = null;
   
   // Main container visibility toggle
   showMainContainer: boolean = false;
@@ -103,6 +105,7 @@ export class HomeUserComponent {
           this.auxOptions.push({value: aux.id, label: aux.name})
         }
 
+        
         this.mainFader = res.fader.find(f => f.id === 0) ?? {
           id: 0,
           name: '',
@@ -110,7 +113,8 @@ export class HomeUserComponent {
           value: 0,
           switch: false,
           link: false,
-          type: null
+          type: null,
+          position: null
         };
 
         res.fader.forEach(f => f.switch = !f.switch)
@@ -156,10 +160,23 @@ export class HomeUserComponent {
         console.error('Errore nel caricamento dei dati:', err); // Debug
       }
     });
+
+    this.userService.loadFaderNames().subscribe({
+      next: (res) => {
+        this.channels.forEach(ch => {
+          const named = res.find(r => r.id === ch.id);
+          if (named) ch.description = named.description;
+        });
+      },
+      error: (err) => {
+        console.error('Errore nel caricamento dei nomi fader:', err);
+      }
+    });
   }
   
 
   ngOnDestroy(): void {
+    this.stopGroupRepeat();
     this.webSocketService.disconnect();
   }
 
@@ -280,7 +297,7 @@ export class HomeUserComponent {
     }
     const id = this.editingProfileId;
     this.profiles = this.profiles.map(p => p.id === id ? { ...p, name } : p);
-    // Aggiorna anche sortedProfiles
+
     this.sortedProfiles = [...this.profiles].sort((a, b) =>
       a.name.localeCompare(b.name, 'it', { sensitivity: 'base' })
     );
@@ -442,12 +459,21 @@ export class HomeUserComponent {
   }
 
   // Group control methods
-  incrementGroupControl(): void {
-    this.applyGroupControl(this.GROUP_CONTROL_STEP);
+  startGroupRepeat(direction: 1 | -1): void {
+    this.stopGroupRepeat();
+    const offset = direction * this.GROUP_CONTROL_STEP;
+    this.applyGroupControl(offset);
+    this.groupRepeatTimer = window.setInterval(
+      () => this.applyGroupControl(offset),
+      this.GROUP_REPEAT_INTERVAL_MS
+    );
   }
 
-  decrementGroupControl(): void {
-    this.applyGroupControl(-this.GROUP_CONTROL_STEP);
+  stopGroupRepeat(): void {
+    if (this.groupRepeatTimer !== null) {
+      clearInterval(this.groupRepeatTimer);
+      this.groupRepeatTimer = null;
+    }
   }
 
   private applyGroupControl(offset: number): void {

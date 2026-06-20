@@ -1,5 +1,4 @@
 import { Component, DestroyRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Scene } from '../../../shared/scene-card/scene-card';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, NgFor } from '@angular/common';
 import { SlidersContainer } from '../../../shared/sliders/sliders-container/sliders-container/sliders-container';
@@ -8,6 +7,7 @@ import { MainContainer } from '../../../shared/main-container/main-container';
 import { Equalizer } from "../../../shared/equalizer/equalizer";
 import { Dca } from "../pages/dca/dca";
 import { MixerService } from '../../../core/services/mixer.service';
+import { UserService } from '../../../core/services/user.service';
 import { Fader } from '../../../core/models/fader.model';
 import { IAuxs } from '../../../core/models/auxs.model';
 import { TypeRequest, TypeSocket, WebSocketService } from '../../../core/services/websocket.service';
@@ -37,16 +37,17 @@ export class HomePageComponent implements OnInit, OnDestroy{
   @ViewChild(AuxContainer) auxContainer?: AuxContainer;
 
   faderList: Fader[] = [];
+  faderSelectedList: Fader[] = [];
   dcaList: Fader[] = [];
   mainFader!: Fader;
   auxList: IAuxs[] = [];
   token = localStorage.getItem('access_token');
   private faderUpdate$ = new Subject<{ fader: Fader, type: TypeRequest }>();
   private destroyRef = inject(DestroyRef);
-  selectedSceneName = '';
 
   constructor(
     private mixerService : MixerService,
+    private userService: UserService,
     private webSocketService: WebSocketService
   ){}
   
@@ -65,11 +66,13 @@ export class HomePageComponent implements OnInit, OnDestroy{
             value: 0,
             switch: false,
             link: false,
-            type: null
+            type: null,
+            position: null
           };
 
           res.forEach(f => f.switch = !f.switch)
           this.faderList = res.filter(f => f.id !== 0);
+          this.faderSelectedList = this.faderList.filter(f => f.position !== null).sort((a, b) => a.position! - b.position!);
         }
       });
 
@@ -93,11 +96,11 @@ export class HomePageComponent implements OnInit, OnDestroy{
         });
       });
 
-    this.mixerService.loadFaderNames()
+    this.userService.loadFaderNames()
      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.faderList.forEach(f => f.description = res.find(a => a.id === f.id)?.description ?? f.description);
+          this.faderSelectedList.forEach(f => f.description = res.find(a => a.id === f.id)?.description ?? f.description);
         }
       });
 
@@ -115,18 +118,6 @@ export class HomePageComponent implements OnInit, OnDestroy{
       .subscribe({
         next: (res) => {
           this.auxList = res;
-        }
-      });
-
-    this.loadSelectedSceneName();
-  }
-
-  private loadSelectedSceneName(): void {
-    this.mixerService.loadScenes()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (scenes: Scene[]) => {
-          this.selectedSceneName = scenes[0]?.name ?? '';
         }
       });
   }
@@ -194,7 +185,7 @@ export class HomePageComponent implements OnInit, OnDestroy{
     this.webSocketService.messages().subscribe(msg => {
       const fader = msg.payload.channel.dca ?
         this.dcaList.find(f => f.id === msg.payload.channel) :
-        this.faderList.find(f => f.id === msg.payload.channel);
+        this.faderSelectedList.find(f => f.id === msg.payload.channel);
 
         if(fader){
           if(msg.payload.value === true || msg.payload.value === false)
@@ -209,7 +200,7 @@ export class HomePageComponent implements OnInit, OnDestroy{
     this.mixerService.loadValues(auxId).subscribe({
       next: (res) => {  
         res.forEach(f => {
-          const item = this.faderList.find(v => v.id === f.id);
+          const item = this.faderSelectedList.find(v => v.id === f.id);
           if (item) {
             item.switch = !f.switch;
             item.value = f.value;

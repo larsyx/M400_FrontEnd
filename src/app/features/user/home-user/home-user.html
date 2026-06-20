@@ -101,18 +101,26 @@
           <div class="group-control-bar">
             <button
               class="group-control-btn decrement"
-              (click)="decrementGroupControl()"
+              (pointerdown)="startGroupRepeat(-1); $event.preventDefault()"
+              (pointerup)="stopGroupRepeat()"
+              (pointerleave)="stopGroupRepeat()"
+              (pointercancel)="stopGroupRepeat()"
+              (contextmenu)="$event.preventDefault()"
               (dblclick)="$event.preventDefault()"
-              title="Diminuisci tutti i canali di 1 dB"
+              title="Diminuisci tutti i canali (tieni premuto)"
               aria-label="Diminuisci gruppo">
               <i class="bi bi-dash-lg"></i>
             </button>
-            
+
             <button
               class="group-control-btn increment"
-              (click)="incrementGroupControl()"
+              (pointerdown)="startGroupRepeat(1); $event.preventDefault()"
+              (pointerup)="stopGroupRepeat()"
+              (pointerleave)="stopGroupRepeat()"
+              (pointercancel)="stopGroupRepeat()"
+              (contextmenu)="$event.preventDefault()"
               (dblclick)="$event.preventDefault()"
-              title="Aumenta tutti i canali di 1 dB"
+              title="Aumenta tutti i canali (tieni premuto)"
               aria-label="Aumenta gruppo">
               <i class="bi bi-plus-lg"></i>
             </button>

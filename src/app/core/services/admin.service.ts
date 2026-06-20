@@ -1,58 +1,51 @@
 import { Injectable } from "@angular/core";
-import { Observable, of } from "rxjs";
-import { delay, map } from "rxjs/operators";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 import { AdminChannel } from "../models/admin.channel.model";
 import { AdminScene } from "../models/admin.scene.model";
 import { SceneParticipant } from "../models/scene.participant.model";
 import { AdminUser } from "../models/admin.user.model";
 import { IAuxs } from "../models/auxs.model";
-import { TypeChannel } from "../models/fader.model";
+import { Channel } from "../models/channel.model";
 import { UserRole } from "../models/user.model";
 import { ChannelLayout } from "../models/channel.layout.model";
 import { environment } from "../../../environments/environment.development";
 import { HttpClient, HttpContext } from "@angular/common/http";
 import { SHOW_LOADER } from "../interceptors/loader.interceptor";
 
-const SIMULATED_LATENCY_MS = 150;
-
 @Injectable({ providedIn: 'root' })
 export class AdminService {
     private API_URL = environment.apiUrl + "/admin";
     private USER_PATH = "/user"
     private LAYOUT_PATH = "/layout"
+    private CHANNEL_PATH = "/channel"
 
     constructor(private http: HttpClient) {}
 
-    private channels: AdminChannel[] = [
-        { id: 1,  name: 'Canale 01', description: 'Voce solista',   type: TypeChannel.VOICE,      selected: true,  position: 0 },
-        { id: 2,  name: 'Canale 02', description: 'Cori',           type: TypeChannel.VOICE,      selected: true,  position: 1 },
-        { id: 3,  name: 'Canale 03', description: 'Chitarra acustica', type: TypeChannel.INSTRUMENT, selected: true,  position: 2 },
-        { id: 4,  name: 'Canale 04', description: 'Chitarra elettrica', type: TypeChannel.INSTRUMENT, selected: true,  position: 3 },
-        { id: 5,  name: 'Canale 05', description: 'Basso',          type: TypeChannel.INSTRUMENT, selected: true,  position: 4 },
-        { id: 6,  name: 'Canale 06', description: 'Tastiera',       type: TypeChannel.INSTRUMENT, selected: false, position: 5 },
-        { id: 7,  name: 'Canale 07', description: 'Cassa',          type: TypeChannel.DRUM,       selected: true,  position: 6 },
-        { id: 8,  name: 'Canale 08', description: 'Rullante',       type: TypeChannel.DRUM,       selected: true,  position: 7 },
-        { id: 9,  name: 'Canale 09', description: '',               type: TypeChannel.DRUM,       selected: false, position: 8 },
-        { id: 10, name: 'Canale 10', description: 'Overhead',       type: TypeChannel.DRUM,       selected: false, position: 9 }
-    ];
-
-    private users: AdminUser[] = [
-        { name: 'Amministratore Sistema', username: 'admin',     role: UserRole.ADMIN },
-        { name: 'Marco Bianchi',          username: 'mixerista', role: UserRole.MIXER },
-        { name: 'Luca Verdi',             username: 'video',     role: UserRole.VIDEO },
-        { name: 'Mario Rossi',            username: 'mario',     role: UserRole.USER },
-        { name: 'Luigi Neri',             username: 'luigi',     role: UserRole.USER },
-        { name: 'Anna Galli',             username: 'anna',      role: UserRole.USER }
-    ];
-
     // ===== Channels =====
     listChannels(): Observable<AdminChannel[]> {
-        return of(this.channels.map(c => ({ ...c }))).pipe(delay(SIMULATED_LATENCY_MS));
+        const url = this.API_URL + this.CHANNEL_PATH;
+        return this.http
+            .get<Channel[]>(url, { context: new HttpContext().set(SHOW_LOADER, true) })
+            .pipe(map(channels => this.toAdminChannels(channels)));
     }
 
-    saveChannels(channels: AdminChannel[]): Observable<void> {
-        this.channels = channels.map(c => ({ ...c }));
-        return of(void 0).pipe(delay(SIMULATED_LATENCY_MS));
+    saveChannels(channels: Channel[]): Observable<void> {
+        const url = this.API_URL + this.CHANNEL_PATH;
+        return this.http.post<void>(url, channels, { context: new HttpContext().set(SHOW_LOADER, true) });
+    }
+
+    private toAdminChannels(channels: Channel[]): AdminChannel[] {
+        let unselectedPos = channels.filter(c => c.position !== null).length;
+        return channels.map(c => ({
+            id: c.id,
+            name: c.name,
+            description: c.description,
+            mixerDescription: '',
+            type: c.type,
+            selected: c.position !== null,
+            position: c.position !== null ? c.position : unselectedPos++
+        }));
     }
 
     // ===== Auxs =====
@@ -149,14 +142,6 @@ export class AdminService {
     deleteUser(username: string): Observable<void> {
         const url = this.API_URL + this.USER_PATH + `/${username}`;
         return this.http.delete<void>(url);
-    }
-
-    isUsernameTaken(username: string, excludeUsername?: string): boolean {
-        const target = username.trim().toLowerCase();
-        const exclude = excludeUsername?.toLowerCase();
-        return this.users.some(u =>
-            u.username.toLowerCase() === target && u.username.toLowerCase() !== exclude
-        );
     }
 
     // ===== Default layout (global) =====

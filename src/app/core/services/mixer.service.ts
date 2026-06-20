@@ -28,11 +28,6 @@ export class MixerService{
     return this.http.get<Fader[]>(url, { context: new HttpContext().set(SHOW_LOADER, true)})
   }
 
-  loadFaderNames(): Observable<Fader[]>{
-    const url = this.API_URL + "/fader/names"
-    return this.http.get<Fader[]>(url)
-  }
-
   loadDca(): Observable<Fader[]>{
     const url = this.API_URL + "/dca"
     return this.http.get<Fader[]>(url)

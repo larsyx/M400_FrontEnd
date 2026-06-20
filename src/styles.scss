@@ -16,6 +16,10 @@ html, body {
   overflow: hidden;
   position: fixed;
   overscroll-behavior: none;
+  touch-action: pan-x pan-y;
+  -ms-touch-action: pan-x pan-y;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 /* Navbar custom styles */
