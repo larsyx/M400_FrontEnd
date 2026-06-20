@@ -1,6 +1,15 @@
 <div class="home-page">
 
   <div class="bottom-menu">
+    <div class="button-group toggle-group">
+      <button class="btn btn-outline-primary"
+              [class.active]="showAllChannels"
+              (click)="showAllChannels = !showAllChannels"
+              [title]="showAllChannels ? 'Mostra solo i canali selezionati' : 'Mostra tutti i canali'">
+        TUTTI
+      </button>
+    </div>
+
     <div class="button-group left-group">
       <!--<button class="btn btn-outline-primary" [class.active]="activeView === HomeViewButtons.EQ" (click)="setView(HomeViewButtons.EQ)">
         EQ
@@ -9,7 +18,7 @@
         DCA
       </button>
     </div>
-    
+
     <div class="button-group right-group">
       <button class="btn btn-outline-primary"
               [class.active]="sidePanelMode === 'main'"
@@ -40,7 +49,7 @@
     }
 
     <div class="main-fader">
-      <app-sliders-container [channels]="faderSelectedList" (faderChange)="updateFader($event)"></app-sliders-container>
+      <app-sliders-container [channels]="showAllChannels ? faderList : faderSelectedList" (faderChange)="updateFader($event)"></app-sliders-container>
       
       @if (sidePanelMode === 'aux') {
       <app-aux-container 

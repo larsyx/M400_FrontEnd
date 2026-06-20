@@ -30,6 +30,9 @@ const loadUserHomePage = () => import('./features/user/home-user/home-user')
 const loadUserLayoutPage = () => import('./features/user/layout-user/layout-user')
                 .then(m => m.LayoutUserComponent);
 
+const loadVideoHomePage = () => import('./features/video/home-video/home-video')
+                .then(m => m.HomeVideoComponent);
+
 const loadAdminDashboard = () => import('./features/admin/dashboard/dashboard')
                 .then(m => m.AdminDashboardComponent);
 
@@ -105,7 +108,7 @@ export const routes: Routes = [
                 children: [
                     {
                         'path' : 'home',
-                        loadComponent: loadHomePage
+                        loadComponent: loadVideoHomePage
                     }
                 ]
             },

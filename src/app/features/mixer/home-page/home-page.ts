@@ -38,6 +38,7 @@ export class HomePageComponent implements OnInit, OnDestroy{
 
   faderList: Fader[] = [];
   faderSelectedList: Fader[] = [];
+  showAllChannels: boolean = false;
   dcaList: Fader[] = [];
   mainFader!: Fader;
   auxList: IAuxs[] = [];
@@ -185,7 +186,7 @@ export class HomePageComponent implements OnInit, OnDestroy{
     this.webSocketService.messages().subscribe(msg => {
       const fader = msg.payload.channel.dca ?
         this.dcaList.find(f => f.id === msg.payload.channel) :
-        this.faderSelectedList.find(f => f.id === msg.payload.channel);
+        this.faderList.find(f => f.id === msg.payload.channel);
 
         if(fader){
           if(msg.payload.value === true || msg.payload.value === false)
@@ -198,9 +199,9 @@ export class HomePageComponent implements OnInit, OnDestroy{
 
   syncChannelsValues(auxId: number){
     this.mixerService.loadValues(auxId).subscribe({
-      next: (res) => {  
+      next: (res) => {
         res.forEach(f => {
-          const item = this.faderSelectedList.find(v => v.id === f.id);
+          const item = this.faderList.find(v => v.id === f.id);
           if (item) {
             item.switch = !f.switch;
             item.value = f.value;

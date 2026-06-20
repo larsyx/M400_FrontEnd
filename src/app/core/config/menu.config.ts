@@ -27,9 +27,9 @@ export const MENU_ITEMS: MenuItem[] = [
         roles: [UserRole.MIXER]
     },
     {
-        label: 'Home',
+        label: 'Mixer',
         route: '/app/video/home',
-        icon: 'house-door',
+        icon: 'sliders',
         roles: [UserRole.VIDEO]
     },
     {

@@ -1,0 +1,164 @@
+<div class="video-home-page">
+  <!-- Header with tabs and controls -->
+  <div class="header-controls">
+    <!-- Top row: MAIN and AUX controls (mobile only) -->
+    <div class="top-controls">
+      <!-- Toggle Main Container button -->
+      <button
+        type="button"
+        class="control-button toggle-main icon-only"
+        [class.active]="showMainContainer"
+        (click)="toggleMainContainer()"
+        (dblclick)="$event.preventDefault()"
+        title="Toggle Main Container"
+        aria-label="Toggle Main Container">
+        <i class="bi bi-sliders"></i>
+      </button>
+
+      <!-- All / Selected channels toggle -->
+      <div class="channel-filter-group" role="group" aria-label="Filtro canali">
+        <button
+          type="button"
+          class="filter-button"
+          [class.active]="!showAllChannels"
+          (click)="showAllChannels = false"
+          (dblclick)="$event.preventDefault()"
+          title="Mostra solo i canali selezionati"
+          aria-label="Solo selezionati">
+          DEF.
+        </button>
+        <button
+          type="button"
+          class="filter-button"
+          [class.active]="showAllChannels"
+          (click)="showAllChannels = true"
+          (dblclick)="$event.preventDefault()"
+          title="Mostra tutti i canali"
+          aria-label="Tutti i canali">
+          TUTTI
+        </button>
+      </div>
+
+      <!-- AUX selector -->
+      <app-custom-select
+        class="aux-select"
+        [options]="auxOptions"
+        [value]="selectedAux"
+        [ariaLabel]="'Select AUX output'"
+        [placeholder]="'Select AUX'"
+        (valueChange)="onAuxChange($event)">
+      </app-custom-select>
+    </div>
+
+    <!-- Main row: Tabs and controls -->
+    <div class="main-row">
+      <!-- Tabs for filtering -->
+      <div class="tabs-container">
+        @for (tab of tabs; track tab.id) {
+          <button
+            class="tab-button"
+            [class.active]="activeTab === tab.id"
+            (click)="selectTab(tab.id)"
+            (dblclick)="$event.preventDefault()">
+            <span class="tab-icon">{{ tab.icon }}</span>
+            <span class="tab-label">{{ tab.label }}</span>
+          </button>
+        }
+      </div>
+
+      <!-- Right controls (desktop only) -->
+      <div class="right-controls">
+        <!-- Toggle Main Container button -->
+        <button
+          type="button"
+          class="control-button toggle-main icon-only"
+          [class.active]="showMainContainer"
+          (click)="toggleMainContainer()"
+          (dblclick)="$event.preventDefault()"
+          title="Toggle Main Container"
+          aria-label="Toggle Main Container">
+          <i class="bi bi-sliders"></i>
+        </button>
+
+        <!-- All / Selected channels toggle -->
+        <div class="channel-filter-group" role="group" aria-label="Filtro canali">
+          <button
+            type="button"
+            class="filter-button"
+            [class.active]="!showAllChannels"
+            (click)="showAllChannels = false"
+            (dblclick)="$event.preventDefault()"
+            title="Mostra solo i canali selezionati"
+            aria-label="Solo selezionati">
+            SEL.
+          </button>
+          <button
+            type="button"
+            class="filter-button"
+            [class.active]="showAllChannels"
+            (click)="showAllChannels = true"
+            (dblclick)="$event.preventDefault()"
+            title="Mostra tutti i canali"
+            aria-label="Tutti i canali">
+            TUTTI
+          </button>
+        </div>
+
+        <!-- AUX selector -->
+        <app-custom-select
+          class="aux-select"
+          [options]="auxOptions"
+          [value]="selectedAux"
+          [ariaLabel]="'Select AUX output'"
+          [placeholder]="'Select AUX'"
+          (valueChange)="onAuxChange($event)">
+        </app-custom-select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content area with sliders and optional main container -->
+  <div class="main-content" [class.horizontal-layout]="sliderOrientation() === 'horizontal'">
+    <div class="sliders-wrapper">
+      <!-- Group control bar (only for specific tabs) -->
+      @if (showGroupControl()) {
+        <div class="group-control-bar">
+          <button
+            class="group-control-btn decrement"
+            (pointerdown)="startGroupRepeat(-1); $event.preventDefault()"
+            (pointerup)="stopGroupRepeat()"
+            (pointerleave)="stopGroupRepeat()"
+            (pointercancel)="stopGroupRepeat()"
+            (contextmenu)="$event.preventDefault()"
+            (dblclick)="$event.preventDefault()"
+            title="Diminuisci tutti i canali (tieni premuto)"
+            aria-label="Diminuisci gruppo">
+            <i class="bi bi-dash-lg"></i>
+          </button>
+
+          <button
+            class="group-control-btn increment"
+            (pointerdown)="startGroupRepeat(1); $event.preventDefault()"
+            (pointerup)="stopGroupRepeat()"
+            (pointerleave)="stopGroupRepeat()"
+            (pointercancel)="stopGroupRepeat()"
+            (contextmenu)="$event.preventDefault()"
+            (dblclick)="$event.preventDefault()"
+            title="Aumenta tutti i canali (tieni premuto)"
+            aria-label="Aumenta gruppo">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </div>
+      }
+
+      <app-sliders-container
+        [channels]="channelsSelected"
+        (faderChange)="updateFader($event)">
+      </app-sliders-container>
+    </div>
+
+    @if (showMainContainer) {
+      <app-main-container [fader]="mainFader" (faderChange)="updateFader($event)"></app-main-container>
+    }
+  </div>
+</div>
