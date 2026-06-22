@@ -150,7 +150,7 @@ export class HomeUserComponent {
               type: event.type,
               payload: {
                 aux_id: this.auxUser?.id,
-                channel: event.fader.id,
+                channel: event.fader.id === 0 ? "Main" : event.fader.id,
                 value: event.fader.value.toFixed(1),
                 switch: !event.fader.switch
               }
