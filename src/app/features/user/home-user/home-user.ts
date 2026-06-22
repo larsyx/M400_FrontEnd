@@ -8,7 +8,7 @@ import { UserService } from '../../../core/services/user.service';
 import { Fader, TypeChannel } from '../../../core/models/fader.model';
 import { TypeRequest, TypeSocket, WebSocketService } from '../../../core/services/websocket.service';
 import { UserRole } from '../../../core/models/user.model';
-import { auditTime, Subject } from 'rxjs';
+import { auditTime, groupBy, mergeMap, Subject } from 'rxjs';
 import { SlidersContainer } from "../../../shared/sliders/sliders-container/sliders-container/sliders-container";
 import { IAuxs } from '../../../core/models/auxs.model';
 import { IProfile } from '../../../core/models/profile.model';
@@ -142,7 +142,8 @@ export class HomeUserComponent {
 
         this.faderUpdate$
           .pipe(
-            auditTime(50)
+            groupBy(event => `${event.fader.id}-${event.type}`),
+            mergeMap(group$ => group$.pipe(auditTime(50)))
           )
           .subscribe(event => {
             this.webSocketService.send({
